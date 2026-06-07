@@ -82,7 +82,7 @@ Update this section as prompts are executed:
 | # | Status | Executed By | Date |
 |---|--------|-------------|------|
 | 0 | ✅ DONE | Kiro | 2026-06-07 |
-| 1 | ⬜ PENDING | — | — |
+| 1 | ✅ DONE | Kiro | 2026-06-07 |
 | 2 | ⬜ PENDING | — | — |
 | 3 | ⬜ PENDING | — | — |
 | 4 | ⬜ PENDING | — | — |
