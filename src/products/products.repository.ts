@@ -3,29 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { Product } from './product.model';
 import { CreateProductDto } from './dto';
-
-export interface CursorPaginationOptions {
-	size: number;
-	after?: number;
-}
-
-export interface CursorPaginatedResult {
-	data: Product[];
-	hasNext: boolean;
-	nextCursor: number | null;
-}
-
-export interface OffsetPaginationOptions {
-	page: number;
-	limit: number;
-}
-
-export interface OffsetPaginatedResult {
-	data: Product[];
-	total: number;
-	page: number;
-	limit: number;
-}
+import { CursorPaginationOptions, CursorPaginatedResult, OffsetPaginationOptions, OffsetPaginatedResult } from '../common/interfaces';
 
 @Injectable()
 export class ProductsRepository {
@@ -43,7 +21,7 @@ export class ProductsRepository {
 		return this.productModel.findByPk(id);
 	}
 
-	async findAll(options: CursorPaginationOptions): Promise<CursorPaginatedResult> {
+	async findAll(options: CursorPaginationOptions): Promise<CursorPaginatedResult<Product>> {
 		const { size, after } = options;
 		const where: Record<string, unknown> = {};
 		if (after) {
@@ -60,7 +38,7 @@ export class ProductsRepository {
 		return { data, hasNext, nextCursor };
 	}
 
-	async findAllOffset(options: OffsetPaginationOptions): Promise<OffsetPaginatedResult> {
+	async findAllOffset(options: OffsetPaginationOptions): Promise<OffsetPaginatedResult<Product>> {
 		const { page, limit } = options;
 		const offset = (page - 1) * limit;
 		const { rows: data, count: total } = await this.productModel.findAndCountAll({

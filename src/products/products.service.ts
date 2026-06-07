@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { ProductsRepository } from './products.repository';
 import { CreateProductDto, UpdateStockDto } from './dto';
 import { Product } from './product.model';
+import { CursorPaginatedResult, OffsetPaginatedResult } from '../common/interfaces';
 
 @Injectable()
 export class ProductsService {
@@ -15,11 +16,11 @@ export class ProductsService {
 		return this.productsRepository.create(dto);
 	}
 
-	async findAll(size: number, after?: number): Promise<{ data: Product[]; hasNext: boolean; nextCursor: number | null }> {
+	async findAll(size: number, after?: number): Promise<CursorPaginatedResult<Product>> {
 		return this.productsRepository.findAll({ size, after });
 	}
 
-	async findAllOffset(page: number, limit: number): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
+	async findAllOffset(page: number, limit: number): Promise<OffsetPaginatedResult<Product>> {
 		return this.productsRepository.findAllOffset({ page, limit });
 	}
 
