@@ -21,8 +21,10 @@ Prompts MUST be executed in sequential order. Each depends on the previous.
 | 3 | Sequelize Setup | `PROMPT_03_SEQUELIZE_SETUP.md` | #2 | `src/database/database.module.ts`, `.sequelizerc`, `database/` migrations + config |
 | 4 | Products Module | `PROMPT_04_PRODUCTS_MODULE.md` | #3 | `src/products/` (model, service, controller, DTOs, module) |
 | 4B | Repository + JSON:API | `PROMPT_04B_REPOSITORY_JSONAPI.md` | #4, #5 | `src/products/products.repository.ts`, `src/common/serializers/`, cursor pagination, sparse fieldsets |
+| 4C | Dual Pagination | `PROMPT_04C_DUAL_PAGINATION.md` | #4B | `src/common/pipes/`, dual pagination (offset-limit default + cursor opt-in via `pt` param) |
 | 5 | Unit Tests | `PROMPT_05_UNIT_TESTS.md` | #4 | `jest.config.ts`, `*.spec.ts` files |
 | 6 | Integration Tests | `PROMPT_06_INTEGRATION_TESTS.md` | #4 | `tests/integration/` (collection, environment) |
+| 6B | Pagination Integration Tests | `PROMPT_06B_PAGINATION_TESTS.md` | #4C, #6 | `tests/integration/pagination.collection.json` |
 | 7 | CI/CD Pipelines | `PROMPT_07_CICD_PIPELINES.md` | #5, #6 | `.github/workflows/ci.yml`, `.gitlab-ci.yml` |
 | 8 | Git Workflow | `PROMPT_08_GIT_WORKFLOW.md` | #0 | `.commitlintrc.json`, `.releaserc.json`, `.husky/commit-msg`, `.gitignore` |
 | 9 | Makefile & Scripts | `PROMPT_09_MAKEFILE_SCRIPTS.md` | #1, #6 | `Makefile`, finalized `package.json` scripts |
@@ -37,7 +39,9 @@ PROMPT_00 (Scaffolding)
 │       └── PROMPT_04 (Products)
 │           ├── PROMPT_05 (Unit Tests)
 │           │   └── PROMPT_04B (Repository + JSON:API)
+│           │       └── PROMPT_04C (Dual Pagination)
 │           └── PROMPT_06 (Integration Tests)
+│               └── PROMPT_06B (Pagination Tests)
 │               └── PROMPT_07 (CI/CD)
 ├── PROMPT_08 (Git Workflow)
 └── PROMPT_09 (Makefile)
@@ -91,6 +95,8 @@ Update this section as prompts are executed:
 | 5 | ✅ DONE | Kiro | 2026-06-07 |
 | 4B | ✅ DONE | Kiro | 2026-06-07 |
 | 6 | ✅ DONE | Kiro | 2026-06-07 |
+| 4C | ✅ DONE | Kiro | 2026-06-07 |
+| 6B | ✅ DONE | Kiro | 2026-06-07 |
 | 7 | ⬜ PENDING | — | — |
 | 8 | ⬜ PENDING | — | — |
 | 9 | ⬜ PENDING | — | — |

@@ -19,6 +19,14 @@ export class ProductsService {
 		return this.productsRepository.findAll({ size, after, attributes });
 	}
 
+	async findAllOffset(
+		page: number,
+		limit: number,
+		attributes?: string[]
+	): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
+		return this.productsRepository.findAllOffset({ page, limit, attributes });
+	}
+
 	async findOne(id: number, attributes?: string[]): Promise<Product> {
 		const product = await this.productsRepository.findById(id, attributes);
 		if (!product) {

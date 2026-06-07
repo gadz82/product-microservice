@@ -10,7 +10,7 @@ export interface JsonApiSingleResponse {
 
 export interface JsonApiCollectionResponse {
 	data: JsonApiResource[];
-	meta: { hasNext: boolean };
+	meta: Record<string, unknown>;
 	links: { next: string | null };
 }
 
@@ -22,7 +22,7 @@ export function serializeOne(type: string, id: number, attributes: Record<string
 export function serializeMany(
 	type: string,
 	items: { id: number; [key: string]: unknown }[],
-	meta: { hasNext: boolean },
+	meta: Record<string, unknown>,
 	links: { next: string | null },
 	fields?: string[]
 ): JsonApiCollectionResponse {

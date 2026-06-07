@@ -17,6 +17,7 @@ describe('ProductsController', () => {
 	const mockService = {
 		create: jest.fn(),
 		findAll: jest.fn(),
+		findAllOffset: jest.fn(),
 		findOne: jest.fn(),
 		updateStock: jest.fn(),
 		remove: jest.fn()
@@ -43,11 +44,20 @@ describe('ProductsController', () => {
 	});
 
 	describe('findAll', () => {
-		it('should return JSON:API collection with cursor pagination', async () => {
+		it('should use offset-limit by default (pt=ol)', async () => {
+			mockService.findAllOffset.mockResolvedValue({ data: [mockProduct], total: 1, page: 1, limit: 10 });
+			const result = await controller.findAll('ol', 1, 10, undefined, undefined, undefined);
+			expect(result.meta).toHaveProperty('total', 1);
+			expect(result.meta).toHaveProperty('page', 1);
+			expect(mockService.findAllOffset).toHaveBeenCalledWith(1, 10, undefined);
+		});
+
+		it('should use cursor pagination when pt=cursor', async () => {
 			mockService.findAll.mockResolvedValue({ data: [mockProduct], hasNext: true, nextCursor: 1 });
-			const result = await controller.findAll(10, undefined, undefined);
-			expect(result.data).toHaveLength(1);
-			expect(result.meta.hasNext).toBe(true);
+			const result = await controller.findAll('cursor', undefined, undefined, 10, undefined, undefined);
+			expect(result.meta).toHaveProperty('hasNext', true);
+			expect(result.meta).not.toHaveProperty('total');
+			expect(result.links.next).toContain('pt=cursor');
 			expect(result.links.next).toContain('page[after]=1');
 		});
 
@@ -58,8 +68,8 @@ describe('ProductsController', () => {
 				price: 9.99,
 				toJSON: (): Record<string, unknown> => ({ id: 1, name: 'Widget', price: 9.99 })
 			};
-			mockService.findAll.mockResolvedValue({ data: [sparseProduct], hasNext: false, nextCursor: null });
-			const result = await controller.findAll(10, undefined, 'name,price');
+			mockService.findAllOffset.mockResolvedValue({ data: [sparseProduct], total: 1, page: 1, limit: 10 });
+			const result = await controller.findAll('ol', 1, 10, undefined, undefined, 'name,price');
 			expect(result.data[0].attributes).toEqual({ name: 'Widget', price: 9.99 });
 		});
 	});

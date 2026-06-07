@@ -16,6 +16,19 @@ export interface CursorPaginatedResult {
 	nextCursor: number | null;
 }
 
+export interface OffsetPaginationOptions {
+	page: number;
+	limit: number;
+	attributes?: string[];
+}
+
+export interface OffsetPaginatedResult {
+	data: Product[];
+	total: number;
+	page: number;
+	limit: number;
+}
+
 @Injectable()
 export class ProductsRepository {
 	constructor(@InjectModel(Product) private readonly productModel: typeof Product) {}
@@ -48,6 +61,18 @@ export class ProductsRepository {
 		const data = hasNext ? rows.slice(0, size) : rows;
 		const nextCursor = hasNext ? data[data.length - 1].id : null;
 		return { data, hasNext, nextCursor };
+	}
+
+	async findAllOffset(options: OffsetPaginationOptions): Promise<OffsetPaginatedResult> {
+		const { page, limit, attributes } = options;
+		const offset = (page - 1) * limit;
+		const { rows: data, count: total } = await this.productModel.findAndCountAll({
+			offset,
+			limit,
+			order: [['id', 'ASC']],
+			...(attributes ? { attributes } : {})
+		});
+		return { data, total, page, limit };
 	}
 
 	async updateStock(product: Product, stock: number): Promise<Product> {

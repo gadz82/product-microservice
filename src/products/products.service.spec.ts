@@ -13,6 +13,7 @@ describe('ProductsService', () => {
 		findByToken: jest.fn(),
 		findById: jest.fn(),
 		findAll: jest.fn(),
+		findAllOffset: jest.fn(),
 		updateStock: jest.fn(),
 		remove: jest.fn()
 	};
@@ -45,6 +46,14 @@ describe('ProductsService', () => {
 			mockRepository.findAll.mockResolvedValue({ data: [mockProduct], hasNext: false, nextCursor: null });
 			const result = await service.findAll(10);
 			expect(result).toEqual({ data: [mockProduct], hasNext: false, nextCursor: null });
+		});
+	});
+
+	describe('findAllOffset', () => {
+		it('should return offset-paginated results', async () => {
+			mockRepository.findAllOffset.mockResolvedValue({ data: [mockProduct], total: 1, page: 1, limit: 10 });
+			const result = await service.findAllOffset(1, 10);
+			expect(result).toEqual({ data: [mockProduct], total: 1, page: 1, limit: 10 });
 		});
 	});
 
