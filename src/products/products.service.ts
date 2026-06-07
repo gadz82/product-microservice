@@ -4,6 +4,7 @@ import { CreateProductDto, UpdateStockDto } from './dto';
 import { Product } from './product.model';
 import { PaginationType } from '../common/pipes';
 import { decodeCursor } from '../common/utils';
+import { PAGINATION_DEFAULTS } from '../common/constants';
 
 export interface PaginatedProducts {
 	data: Product[];
@@ -27,7 +28,7 @@ export class ProductsService {
 
 	async list(pt: PaginationType, page?: number, limit?: number, size?: number, after?: string): Promise<PaginatedProducts> {
 		if (pt === 'cursor') {
-			const pageSize = size ?? 10;
+			const pageSize = size ?? PAGINATION_DEFAULTS.SIZE;
 			let afterId: number | undefined;
 			if (after) {
 				try {
@@ -40,8 +41,8 @@ export class ProductsService {
 			return { data: result.data, meta: { hasNext: result.hasNext }, nextCursor: result.nextCursor };
 		}
 
-		const pageNum = page ?? 1;
-		const pageLimit = limit ?? 10;
+		const pageNum = page ?? PAGINATION_DEFAULTS.PAGE;
+		const pageLimit = limit ?? PAGINATION_DEFAULTS.LIMIT;
 		const result = await this.productsRepository.findAllOffset({ page: pageNum, limit: pageLimit });
 		const hasNext = result.page * result.limit < result.total;
 		return {

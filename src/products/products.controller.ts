@@ -4,6 +4,7 @@ import { ProductsSerializer } from './products.serializer';
 import { CreateProductDto, UpdateStockDto } from './dto';
 import { JsonApiSingleResponse, JsonApiCollectionResponse } from '../common/serializers';
 import { ParsePaginationTypePipe, PaginationType } from '../common/pipes';
+import { PAGINATION_DEFAULTS } from '../common/constants';
 
 @Controller('products')
 export class ProductsController {
@@ -30,7 +31,7 @@ export class ProductsController {
 		const result = await this.productsService.list(pt, page, limit, size, after);
 		const nextLink =
 			pt === 'cursor'
-				? this.serializer.cursorLink(size ?? 10, result.nextCursor)
+				? this.serializer.cursorLink(size ?? PAGINATION_DEFAULTS.SIZE, result.nextCursor)
 				: this.serializer.offsetLink(result.page!, result.limit!, !!result.meta.hasNext);
 		return this.serializer.many(result.data, result.meta, nextLink);
 	}
