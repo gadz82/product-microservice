@@ -27,7 +27,7 @@ export class ProductsService {
 	}
 
 	async list(pt: PaginationType, page?: number, limit?: number, size?: number, after?: string): Promise<PaginatedProducts> {
-		if (pt === 'cursor') {
+		if (pt === PAGINATION_DEFAULTS.CURSOR_TYPE) {
 			const pageSize = size ?? PAGINATION_DEFAULTS.SIZE;
 			let afterId: number | undefined;
 			if (after) {

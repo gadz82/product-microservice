@@ -30,7 +30,7 @@ export class ProductsController {
 	): Promise<JsonApiCollectionResponse> {
 		const result = await this.productsService.list(pt, page, limit, size, after);
 		const nextLink =
-			pt === 'cursor'
+			pt === PAGINATION_DEFAULTS.CURSOR_TYPE
 				? this.serializer.cursorLink(size ?? PAGINATION_DEFAULTS.SIZE, result.nextCursor)
 				: this.serializer.offsetLink(result.page!, result.limit!, !!result.meta.hasNext);
 		return this.serializer.many(result.data, result.meta, nextLink);
