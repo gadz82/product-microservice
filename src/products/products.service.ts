@@ -24,21 +24,21 @@ export class ProductsService {
 		return this.productsRepository.findAllOffset({ page, limit });
 	}
 
-	async findOne(id: number): Promise<Product> {
-		const product = await this.productsRepository.findById(id);
+	async findOneByToken(token: string): Promise<Product> {
+		const product = await this.productsRepository.findByToken(token);
 		if (!product) {
-			throw new NotFoundException(`Product with id ${id} not found`);
+			throw new NotFoundException(`Product with token "${token}" not found`);
 		}
 		return product;
 	}
 
-	async updateStock(id: number, dto: UpdateStockDto): Promise<Product> {
-		const product = await this.findOne(id);
+	async updateStock(token: string, dto: UpdateStockDto): Promise<Product> {
+		const product = await this.findOneByToken(token);
 		return this.productsRepository.updateStock(product, dto.stock);
 	}
 
-	async remove(id: number): Promise<void> {
-		const product = await this.findOne(id);
+	async remove(token: string): Promise<void> {
+		const product = await this.findOneByToken(token);
 		await this.productsRepository.remove(product);
 	}
 }

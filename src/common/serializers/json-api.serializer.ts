@@ -14,19 +14,16 @@ export interface JsonApiCollectionResponse {
 	links: { next: string | null };
 }
 
-export function serializeOne(type: string, id: number, attributes: Record<string, unknown>): JsonApiSingleResponse {
-	return { data: { type, id: String(id), attributes } };
+export function serializeOne(type: string, id: string, attributes: Record<string, unknown>): JsonApiSingleResponse {
+	return { data: { type, id, attributes } };
 }
 
 export function serializeMany(
 	type: string,
-	items: { id: number; [key: string]: unknown }[],
+	items: { id: string; attributes: Record<string, unknown> }[],
 	meta: Record<string, unknown>,
 	links: { next: string | null }
 ): JsonApiCollectionResponse {
-	const data = items.map((item) => {
-		const { id, ...attributes } = item;
-		return { type, id: String(id), attributes };
-	});
+	const data = items.map((item) => ({ type, id: item.id, attributes: item.attributes }));
 	return { data, meta, links };
 }

@@ -57,33 +57,33 @@ describe('ProductsService', () => {
 		});
 	});
 
-	describe('findOne', () => {
+	describe('findOneByToken', () => {
 		it('should return product when found', async () => {
-			mockRepository.findById.mockResolvedValue(mockProduct);
-			const result = await service.findOne(1);
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
+			const result = await service.findOneByToken('tok-1');
 			expect(result).toEqual(mockProduct);
 		});
 
 		it('should throw NotFoundException when product does not exist', async () => {
-			mockRepository.findById.mockResolvedValue(null);
-			await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
+			mockRepository.findByToken.mockResolvedValue(null);
+			await expect(service.findOneByToken('missing')).rejects.toThrow(NotFoundException);
 		});
 	});
 
 	describe('updateStock', () => {
 		it('should delegate to repository updateStock', async () => {
-			mockRepository.findById.mockResolvedValue(mockProduct);
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
 			mockRepository.updateStock.mockResolvedValue({ ...mockProduct, stock: 50 });
-			const result = await service.updateStock(1, { stock: 50 });
+			const result = await service.updateStock('tok-1', { stock: 50 });
 			expect(result.stock).toBe(50);
 		});
 	});
 
 	describe('remove', () => {
 		it('should delegate to repository remove', async () => {
-			mockRepository.findById.mockResolvedValue(mockProduct);
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
 			mockRepository.remove.mockResolvedValue(undefined);
-			await service.remove(1);
+			await service.remove('tok-1');
 			expect(mockRepository.remove).toHaveBeenCalledWith(mockProduct);
 		});
 	});

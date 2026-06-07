@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { ProductsService } from './products.service';
-import { CreateProductDto, UpdateStockDto } from './dto';
+import { CreateProductDto, UpdateStockDto, ProductResponseDto } from './dto';
 import { serializeOne, serializeMany, JsonApiSingleResponse, JsonApiCollectionResponse } from '../common/serializers';
 import { ParsePaginationTypePipe, PaginationType } from '../common/pipes';
+import { encodeCursor, decodeCursor } from '../common/utils';
 
 @Controller('products')
 export class ProductsController {
@@ -12,8 +14,8 @@ export class ProductsController {
 	@HttpCode(HttpStatus.CREATED)
 	async create(@Body() dto: CreateProductDto): Promise<JsonApiSingleResponse> {
 		const product = await this.productsService.create(dto);
-		const { id, ...attributes } = product.toJSON();
-		return serializeOne('products', id, attributes);
+		const attributes = plainToInstance(ProductResponseDto, product.toJSON(), { excludeExtraneousValues: true });
+		return serializeOne('products', product.productToken, attributes as unknown as Record<string, unknown>);
 	}
 
 	@Get()
@@ -22,42 +24,56 @@ export class ProductsController {
 		@Query('page', new ParseIntPipe({ optional: true })) page?: number,
 		@Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
 		@Query('page[size]', new ParseIntPipe({ optional: true })) size?: number,
-		@Query('page[after]', new ParseIntPipe({ optional: true })) after?: number
+		@Query('page[after]') after?: string
 	): Promise<JsonApiCollectionResponse> {
 		if (pt === 'cursor') {
 			const pageSize = size ?? 10;
-			const { data, hasNext, nextCursor } = await this.productsService.findAll(pageSize, after);
-			const items = data.map((p) => p.toJSON() as { id: number; [key: string]: unknown });
-			const nextLink = nextCursor ? `/products?pt=cursor&page[size]=${pageSize}&page[after]=${nextCursor}` : null;
+			let afterId: number | undefined;
+			if (after) {
+				try {
+					afterId = decodeCursor(after);
+				} catch {
+					throw new BadRequestException('Invalid cursor');
+				}
+			}
+			const { data, hasNext, nextCursor } = await this.productsService.findAll(pageSize, afterId);
+			const items = data.map((p) => ({
+				id: p.productToken,
+				attributes: plainToInstance(ProductResponseDto, p.toJSON(), { excludeExtraneousValues: true }) as unknown as Record<string, unknown>
+			}));
+			const nextLink = nextCursor ? `/products?pt=cursor&page[size]=${pageSize}&page[after]=${encodeCursor(nextCursor)}` : null;
 			return serializeMany('products', items, { hasNext }, { next: nextLink });
 		}
 
 		const pageNum = page ?? 1;
 		const pageLimit = limit ?? 10;
 		const result = await this.productsService.findAllOffset(pageNum, pageLimit);
-		const items = result.data.map((p) => p.toJSON() as { id: number; [key: string]: unknown });
+		const items = result.data.map((p) => ({
+			id: p.productToken,
+			attributes: plainToInstance(ProductResponseDto, p.toJSON(), { excludeExtraneousValues: true }) as unknown as Record<string, unknown>
+		}));
 		const hasNext = result.page * result.limit < result.total;
 		const nextLink = hasNext ? `/products?page=${result.page + 1}&limit=${result.limit}` : null;
 		return serializeMany('products', items, { hasNext, total: result.total, page: result.page, limit: result.limit }, { next: nextLink });
 	}
 
-	@Get(':id')
-	async findOne(@Param('id', ParseIntPipe) id: number): Promise<JsonApiSingleResponse> {
-		const product = await this.productsService.findOne(id);
-		const { id: productId, ...attributes } = product.toJSON();
-		return serializeOne('products', productId, attributes);
+	@Get(':productToken')
+	async findOne(@Param('productToken') productToken: string): Promise<JsonApiSingleResponse> {
+		const product = await this.productsService.findOneByToken(productToken);
+		const attributes = plainToInstance(ProductResponseDto, product.toJSON(), { excludeExtraneousValues: true });
+		return serializeOne('products', product.productToken, attributes as unknown as Record<string, unknown>);
 	}
 
-	@Patch(':id/stock')
-	async updateStock(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateStockDto): Promise<JsonApiSingleResponse> {
-		const product = await this.productsService.updateStock(id, dto);
-		const { id: productId, ...attributes } = product.toJSON();
-		return serializeOne('products', productId, attributes);
+	@Patch(':productToken/stock')
+	async updateStock(@Param('productToken') productToken: string, @Body() dto: UpdateStockDto): Promise<JsonApiSingleResponse> {
+		const product = await this.productsService.updateStock(productToken, dto);
+		const attributes = plainToInstance(ProductResponseDto, product.toJSON(), { excludeExtraneousValues: true });
+		return serializeOne('products', product.productToken, attributes as unknown as Record<string, unknown>);
 	}
 
-	@Delete(':id')
+	@Delete(':productToken')
 	@HttpCode(HttpStatus.NO_CONTENT)
-	remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-		return this.productsService.remove(id);
+	remove(@Param('productToken') productToken: string): Promise<void> {
+		return this.productsService.remove(productToken);
 	}
 }

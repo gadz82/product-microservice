@@ -15,10 +15,11 @@
 							"const json = pm.response.json();",
 							"pm.test('Has JSON:API data wrapper', () => pm.expect(json.data).to.be.an('object'));",
 							"pm.test('Type is products', () => pm.expect(json.data.type).to.eql('products'));",
-							"pm.test('Has id', () => pm.expect(json.data.id).to.be.a('string'));",
+							"pm.test('Id is productToken', () => pm.expect(json.data.id).to.eql('int-test-token'));",
 							"pm.test('Attributes has name', () => pm.expect(json.data.attributes.name).to.eql('Integration Widget'));",
-							"pm.test('Attributes has productToken', () => pm.expect(json.data.attributes.productToken).to.eql('int-test-token'));",
-							"pm.collectionVariables.set('productId', json.data.id);"
+							"pm.test('Attributes does NOT have id', () => pm.expect(json.data.attributes).to.not.have.property('id'));",
+							"pm.test('Attributes does NOT have productToken', () => pm.expect(json.data.attributes).to.not.have.property('productToken'));",
+							"pm.collectionVariables.set('productToken', json.data.id);"
 						]
 					}
 				}
@@ -45,7 +46,7 @@
 							"pm.test('Has data array', () => pm.expect(json.data).to.be.an('array'));",
 							"pm.test('Has meta with hasNext', () => pm.expect(json.meta).to.have.property('hasNext'));",
 							"pm.test('Has links with next', () => pm.expect(json.links).to.have.property('next'));",
-							"pm.test('Data items have JSON:API structure', () => { const item = json.data[0]; pm.expect(item.type).to.eql('products'); pm.expect(item.id).to.be.a('string'); pm.expect(item.attributes).to.be.an('object'); });"
+							"pm.test('Data items use productToken as id', () => { const item = json.data[0]; pm.expect(item.id).to.be.a('string'); pm.expect(item.attributes).to.not.have.property('id'); });"
 						]
 					}
 				}
@@ -65,15 +66,15 @@
 							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
 							"const json = pm.response.json();",
 							"pm.test('Type is products', () => pm.expect(json.data.type).to.eql('products'));",
-							"pm.test('Correct id', () => pm.expect(json.data.id).to.eql(pm.collectionVariables.get('productId')));",
-							"pm.test('Has productToken in attributes', () => pm.expect(json.data.attributes.productToken).to.eql('int-test-token'));"
+							"pm.test('Id matches token', () => pm.expect(json.data.id).to.eql(pm.collectionVariables.get('productToken')));",
+							"pm.test('No id in attributes', () => pm.expect(json.data.attributes).to.not.have.property('id'));"
 						]
 					}
 				}
 			],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}"] }
+				"url": { "raw": "{{baseUrl}}/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productToken}}"] }
 			}
 		},
 		{
@@ -95,7 +96,7 @@
 				"method": "PATCH",
 				"header": [{ "key": "Content-Type", "value": "application/json" }],
 				"body": { "mode": "raw", "raw": "{\"stock\": 75}" },
-				"url": { "raw": "{{baseUrl}}/products/{{productId}}/stock", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}", "stock"] }
+				"url": { "raw": "{{baseUrl}}/products/{{productToken}}/stock", "host": ["{{baseUrl}}"], "path": ["products", "{{productToken}}", "stock"] }
 			}
 		},
 		{
@@ -112,7 +113,7 @@
 			],
 			"request": {
 				"method": "DELETE",
-				"url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}"] }
+				"url": { "raw": "{{baseUrl}}/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productToken}}"] }
 			}
 		},
 		{
@@ -129,11 +130,11 @@
 			],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}"] }
+				"url": { "raw": "{{baseUrl}}/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productToken}}"] }
 			}
 		}
 	],
 	"variable": [
-		{ "key": "productId", "value": "" }
+		{ "key": "productToken", "value": "" }
 	]
 }
