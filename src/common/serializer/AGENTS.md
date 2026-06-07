@@ -5,6 +5,7 @@ This module handles JSON:API compliant serialization for application responses.
 
 ## Components
 - **Services**: `JsonApiSerializer` provides generic methods for serializing single objects and collections.
+- **DTOs**: `JsonApiSingleResponseSwagger` and `JsonApiCollectionResponseSwagger` provide schemas for OpenAPI documentation.
 - **Interfaces**: Definitions for JSON:API resources, links, and response structures.
 - **Module**: `json-api.module.ts` provides the `JsonApiSerializer` as a shared service.
 

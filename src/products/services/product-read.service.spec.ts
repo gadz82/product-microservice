@@ -8,12 +8,21 @@ import { RedisLazyCacheService } from '../../common/cache/services/redis-lazy-ca
 describe('ProductReadService', () => {
 	let service: ProductReadService;
 
-	const mockProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100 };
+	const mockProduct = { 
+		id: 1, 
+		productToken: 'tok-1', 
+		name: 'Widget', 
+		price: 9.99, 
+		stock: 100,
+		get: jest.fn().mockReturnValue({ id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100 }),
+		toJSON: jest.fn().mockReturnValue({ id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100 })
+	};
 
 	const mockRepository = {
 		findByToken: jest.fn(),
 		findAll: jest.fn(),
-		findAllOffset: jest.fn()
+		findAllOffset: jest.fn(),
+		buildFromCache: jest.fn().mockImplementation((data) => ({ ...data, get: jest.fn().mockReturnValue(data), toJSON: jest.fn().mockReturnValue(data) }))
 	};
 
 	const mockCacheService = {
@@ -36,11 +45,13 @@ describe('ProductReadService', () => {
 
 	describe('list', () => {
 		it('should return cached results if available', async () => {
-			const cachedResult = { data: [mockProduct], meta: {}, nextCursor: null };
+			const plainProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100 };
+			const cachedResult = { data: [plainProduct], meta: {}, nextCursor: null };
 			mockCacheService.get.mockResolvedValue(cachedResult);
 			const result = await service.list('ol', 1, 10);
-			expect(result).toEqual(cachedResult);
+			expect(result.data[0].productToken).toBe('tok-1');
 			expect(mockCacheService.get).toHaveBeenCalled();
+			expect(mockRepository.buildFromCache).toHaveBeenCalledWith(plainProduct);
 			expect(mockRepository.findAllOffset).not.toHaveBeenCalled();
 		});
 
@@ -71,10 +82,21 @@ describe('ProductReadService', () => {
 	});
 
 	describe('findOneByToken', () => {
-		it('should return cached product if available', async () => {
-			mockCacheService.get.mockResolvedValue(mockProduct);
+		it('should return cached product if available and preserve timestamps', async () => {
+			const now = new Date();
+			const plainProduct = { 
+				id: 1, 
+				productToken: 'tok-1', 
+				name: 'Widget', 
+				price: 9.99, 
+				stock: 100,
+				createdAt: now.toISOString(),
+				updatedAt: now.toISOString()
+			};
+			mockCacheService.get.mockResolvedValue(plainProduct);
 			const result = await service.findOneByToken('tok-1');
-			expect(result).toEqual(mockProduct);
+			expect(result.productToken).toBe('tok-1');
+			expect(mockRepository.buildFromCache).toHaveBeenCalledWith(plainProduct);
 			expect(mockRepository.findByToken).not.toHaveBeenCalled();
 		});
 

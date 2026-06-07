@@ -31,8 +31,32 @@ describe('ProductsSerializer', () => {
 			expect(result.data.type).toBe('products');
 			expect(result.data.id).toBe('tok-1');
 			expect(result.data.attributes).toHaveProperty('name', 'Widget');
+			expect(result.data.attributes).toHaveProperty('createdAt');
+			expect(result.data.attributes).toHaveProperty('updatedAt');
 			expect(result.data.attributes).not.toHaveProperty('id');
 			expect(result.data.attributes).not.toHaveProperty('productToken');
+		});
+
+		it('should serialize correctly even when timestamps are strings (from Redis)', () => {
+			const dateStr = '2026-06-08T00:00:00.000Z';
+			const plainData = {
+				id: 2,
+				productToken: 'tok-2',
+				name: 'Gadget',
+				price: 19.99,
+				stock: 50,
+				createdAt: dateStr,
+				updatedAt: dateStr
+			};
+			// Simulating build(plainData) behavior
+			const builtProduct = {
+				...plainData,
+				toJSON: () => plainData
+			} as unknown as Product;
+
+			const result = serializer.one(builtProduct);
+			expect(result.data.attributes.createdAt).toBe(dateStr);
+			expect(result.data.attributes.updatedAt).toBe(dateStr);
 		});
 	});
 
@@ -55,9 +79,7 @@ describe('ProductsSerializer', () => {
 	describe('cursorLink', () => {
 		it('should return encoded cursor link when nextCursor exists', () => {
 			const link = serializer.cursorLink(10, 5);
-			expect(link).toContain('pt=cursor');
-			expect(link).toContain('page[size]=10');
-			expect(link).toContain('page[after]=');
+			expect(link).toBe('/v1/products?pt=cursor&page[size]=10&page[after]=NQ==');
 		});
 
 		it('should return null when no nextCursor', () => {
@@ -68,7 +90,7 @@ describe('ProductsSerializer', () => {
 	describe('offsetLink', () => {
 		it('should return next page link when hasNext', () => {
 			const link = serializer.offsetLink(1, 10, true);
-			expect(link).toBe('/products?page=2&limit=10');
+			expect(link).toBe('/v1/products?page=2&limit=10');
 		});
 
 		it('should return null when no next page', () => {

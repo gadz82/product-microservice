@@ -11,7 +11,7 @@
 				"method": "POST",
 				"header": [{ "key": "Content-Type", "value": "application/json" }],
 				"body": { "mode": "raw", "raw": "{\"name\": \"Pagination A\", \"productToken\": \"pag-tok-a\", \"price\": 10, \"stock\": 5}" },
-				"url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+    "url": { "raw": "{{baseUrl}}/v1/products", "host": ["{{baseUrl}}"], "path": ["v1", "products"] }
 			}
 		},
 		{
@@ -21,7 +21,7 @@
 				"method": "POST",
 				"header": [{ "key": "Content-Type", "value": "application/json" }],
 				"body": { "mode": "raw", "raw": "{\"name\": \"Pagination B\", \"productToken\": \"pag-tok-b\", \"price\": 20, \"stock\": 10}" },
-				"url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+    "url": { "raw": "{{baseUrl}}/v1/products", "host": ["{{baseUrl}}"], "path": ["v1", "products"] }
 			}
 		},
 		{
@@ -36,7 +36,7 @@
 			] } }],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+    "url": { "raw": "{{baseUrl}}/v1/products?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["v1", "products"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
 			}
 		},
 		{
@@ -49,7 +49,7 @@
 			] } }],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products?pt=ol&page=1&limit=1", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "pt", "value": "ol" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "1" }] }
+    "url": { "raw": "{{baseUrl}}/v1/products?pt=ol&page=1&limit=1", "host": ["{{baseUrl}}"], "path": ["v1", "products"], "query": [{ "key": "pt", "value": "ol" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "1" }] }
 			}
 		},
 		{
@@ -62,7 +62,7 @@
 			] } }],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products?pt=ol&page=2&limit=1", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "pt", "value": "ol" }, { "key": "page", "value": "2" }, { "key": "limit", "value": "1" }] }
+    "url": { "raw": "{{baseUrl}}/v1/products?pt=ol&page=2&limit=1", "host": ["{{baseUrl}}"], "path": ["v1", "products"], "query": [{ "key": "pt", "value": "ol" }, { "key": "page", "value": "2" }, { "key": "limit", "value": "1" }] }
 			}
 		},
 		{
@@ -78,7 +78,7 @@
 			] } }],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products?pt=cursor&page[size]=1", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "pt", "value": "cursor" }, { "key": "page[size]", "value": "1" }] }
+    "url": { "raw": "{{baseUrl}}/v1/products?pt=cursor&page[size]=1", "host": ["{{baseUrl}}"], "path": ["v1", "products"], "query": [{ "key": "pt", "value": "cursor" }, { "key": "page[size]", "value": "1" }] }
 			}
 		},
 		{
@@ -91,7 +91,7 @@
 			] } }],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products?pt=cursor&page[size]=1&page[after]={{firstCursor}}", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "pt", "value": "cursor" }, { "key": "page[size]", "value": "1" }, { "key": "page[after]", "value": "{{firstCursor}}" }] }
+    "url": { "raw": "{{baseUrl}}/v1/products?pt=cursor&page[size]=1&page[after]={{firstCursor}}", "host": ["{{baseUrl}}"], "path": ["v1", "products"], "query": [{ "key": "pt", "value": "cursor" }, { "key": "page[size]", "value": "1" }, { "key": "page[after]", "value": "{{firstCursor}}" }] }
 			}
 		},
 		{
@@ -102,7 +102,7 @@
 			] } }],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products?pt=invalid", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "pt", "value": "invalid" }] }
+    "url": { "raw": "{{baseUrl}}/v1/products?pt=invalid", "host": ["{{baseUrl}}"], "path": ["v1", "products"], "query": [{ "key": "pt", "value": "invalid" }] }
 			}
 		}
 	],

@@ -66,8 +66,8 @@ describe('ProductsController', () => {
 		it('should use cursorLink when pt=cursor', async () => {
 			const listResult = { data: [mockProduct], meta: { hasNext: true }, nextCursor: 1 };
 			mockReadService.list.mockResolvedValue(listResult);
-			mockSerializer.cursorLink.mockReturnValue('/products?pt=cursor&page[size]=10&page[after]=MQ==');
-			mockSerializer.many.mockReturnValue({ data: [], meta: {}, links: { next: '/products?pt=cursor&page[size]=10&page[after]=MQ==' } });
+			mockSerializer.cursorLink.mockReturnValue('/v1/products?pt=cursor&page[size]=10&page[after]=MQ==');
+			mockSerializer.many.mockReturnValue({ data: [], meta: {}, links: { next: '/v1/products?pt=cursor&page[size]=10&page[after]=MQ==' } });
 			await controller.findAll('cursor', undefined, undefined, 10, undefined);
 			expect(mockSerializer.cursorLink).toHaveBeenCalledWith(10, 1);
 		});

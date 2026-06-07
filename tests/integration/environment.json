@@ -2,7 +2,7 @@
 	"id": "products-env",
 	"name": "Products Local",
 	"values": [
-		{ "key": "baseUrl", "value": "http://localhost:3000", "enabled": true },
+  { "key": "baseUrl", "value": "http://localhost:3000", "enabled": true },
 		{ "key": "productToken", "value": "int-test-token", "enabled": true }
 	]
 }

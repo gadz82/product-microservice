@@ -15,7 +15,12 @@ export class ProductReadService {
 	async list(pt: PaginationType, page?: number, limit?: number, size?: number, after?: string): Promise<PaginatedProducts> {
 		const cacheKey = `product:list:${pt}:${page ?? ''}:${limit ?? ''}:${size ?? ''}:${after ?? ''}`;
 		const cached = await this.cacheService.get<PaginatedProducts>(cacheKey);
-		if (cached) return cached;
+		if (cached) {
+			return {
+				...cached,
+				data: cached.data.map((item: any) => this.productsRepository.buildFromCache(item))
+			};
+		}
 
 		let result: PaginatedProducts;
 		if (pt === PAGINATION_DEFAULTS.CURSOR_TYPE) {
@@ -44,21 +49,26 @@ export class ProductReadService {
 			};
 		}
 
-		await this.cacheService.set(cacheKey, result);
+		await this.cacheService.set(cacheKey, {
+			...result,
+			data: result.data.map((p) => p.toJSON())
+		});
 		return result;
 	}
 
 	async findOneByToken(token: string): Promise<Product> {
 		const cacheKey = `product:detail:${token}`;
-		const cached = await this.cacheService.get<Product>(cacheKey);
-		if (cached) return cached;
+		const cached = await this.cacheService.get<any>(cacheKey);
+		if (cached) {
+			return this.productsRepository.buildFromCache(cached);
+		}
 
 		const product = await this.productsRepository.findByToken(token);
 		if (!product) {
 			throw new NotFoundException(`Product with token "${token}" not found`);
 		}
 
-		await this.cacheService.set(cacheKey, product);
+		await this.cacheService.set(cacheKey, product.toJSON());
 		return product;
 	}
 }

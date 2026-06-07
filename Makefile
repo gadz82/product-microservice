@@ -32,7 +32,7 @@ smoke-test: install build unit-test
 	@echo "Waiting for services to be healthy..."
 	@docker compose exec mysql mysqladmin ping -h localhost --silent || sleep 5
 	npm run db:migrate
-	@sleep 3
+	@sleep 5
 	@curl -sf http://localhost:3000/products?page=1&limit=1 > /dev/null && echo "Smoke test passed" || echo "Smoke test failed"
 
 full-test: down install build unit-test smoke-test

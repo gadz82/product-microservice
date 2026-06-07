@@ -3,10 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { RedisLazyCacheService } from './services/redis-lazy-cache.service';
 
-export const REDIS_CLIENT = 'REDIS_CLIENT';
-
 const RedisClientProvider: Provider = {
-	provide: REDIS_CLIENT,
+	provide: Redis,
 	useFactory: (configService: ConfigService) => {
 		return new Redis({
 			host: configService.get<string>('redis.host'),
@@ -18,6 +16,6 @@ const RedisClientProvider: Provider = {
 
 @Module({
 	providers: [RedisClientProvider, RedisLazyCacheService],
-	exports: [REDIS_CLIENT, RedisLazyCacheService]
+	exports: [Redis, RedisLazyCacheService]
 })
 export class CacheModule {}

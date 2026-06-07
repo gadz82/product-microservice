@@ -24,11 +24,11 @@ export class ProductsSerializer {
 	}
 
 	cursorLink(pageSize: number, nextCursor: number | null): string | null {
-		return nextCursor ? `/products?pt=${PAGINATION_DEFAULTS.CURSOR_TYPE}&page[size]=${pageSize}&page[after]=${encodeCursor(nextCursor)}` : null;
+		return nextCursor ? `/v1/products?pt=${PAGINATION_DEFAULTS.CURSOR_TYPE}&page[size]=${pageSize}&page[after]=${encodeCursor(nextCursor)}` : null;
 	}
 
 	offsetLink(page: number, limit: number, hasNext: boolean): string | null {
-		return hasNext ? `/products?page=${page + 1}&limit=${limit}` : null;
+		return hasNext ? `/v1/products?page=${page + 1}&limit=${limit}` : null;
 	}
 
 	private toAttributes(product: Product): Record<string, unknown> {

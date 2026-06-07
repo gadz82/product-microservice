@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RedisLazyCacheService } from './redis-lazy-cache.service';
-import { REDIS_CLIENT } from '../cache.module';
+import Redis from "ioredis";
 
 describe('RedisLazyCacheService', () => {
 	let service: RedisLazyCacheService;
@@ -17,7 +17,7 @@ describe('RedisLazyCacheService', () => {
 	beforeEach(async () => {
 		jest.clearAllMocks();
 		const module: TestingModule = await Test.createTestingModule({
-			providers: [RedisLazyCacheService, { provide: REDIS_CLIENT, useValue: mockRedis }]
+			providers: [RedisLazyCacheService, { provide: Redis, useValue: mockRedis }]
 		}).compile();
 
 		service = module.get<RedisLazyCacheService>(RedisLazyCacheService);

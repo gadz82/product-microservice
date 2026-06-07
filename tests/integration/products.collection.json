@@ -31,7 +31,7 @@
 					"mode": "raw",
 					"raw": "{\"name\": \"Integration Widget\", \"productToken\": \"int-test-token\", \"price\": 19.99, \"stock\": 50}"
 				},
-				"url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+    "url": { "raw": "{{baseUrl}}/v1/products", "host": ["{{baseUrl}}"], "path": ["v1", "products"] }
 			}
 		},
 		{
@@ -53,7 +53,7 @@
 			],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+    "url": { "raw": "{{baseUrl}}/v1/products?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["v1", "products"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
 			}
 		},
 		{
@@ -74,7 +74,7 @@
 			],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productToken}}"] }
+    "url": { "raw": "{{baseUrl}}/v1/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["v1", "products", "{{productToken}}"] }
 			}
 		},
 		{
@@ -96,7 +96,7 @@
 				"method": "PATCH",
 				"header": [{ "key": "Content-Type", "value": "application/json" }],
 				"body": { "mode": "raw", "raw": "{\"stock\": 75}" },
-				"url": { "raw": "{{baseUrl}}/products/{{productToken}}/stock", "host": ["{{baseUrl}}"], "path": ["products", "{{productToken}}", "stock"] }
+    "url": { "raw": "{{baseUrl}}/v1/products/{{productToken}}/stock", "host": ["{{baseUrl}}"], "path": ["v1", "products", "{{productToken}}", "stock"] }
 			}
 		},
 		{
@@ -113,7 +113,7 @@
 			],
 			"request": {
 				"method": "DELETE",
-				"url": { "raw": "{{baseUrl}}/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productToken}}"] }
+    "url": { "raw": "{{baseUrl}}/v1/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["v1", "products", "{{productToken}}"] }
 			}
 		},
 		{
@@ -130,7 +130,7 @@
 			],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productToken}}"] }
+    "url": { "raw": "{{baseUrl}}/v1/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["v1", "products", "{{productToken}}"] }
 			}
 		}
 	],

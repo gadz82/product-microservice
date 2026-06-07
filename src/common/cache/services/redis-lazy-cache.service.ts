@@ -1,13 +1,12 @@
 import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 import { LazyCacheService } from '../interfaces/lazy-cache.service.interface';
-import { REDIS_CLIENT } from '../cache.module';
 
 @Injectable()
 export class RedisLazyCacheService implements LazyCacheService, OnModuleDestroy {
 	private readonly defaultTtl = 60; // 60 seconds
 
-	constructor(@Inject(REDIS_CLIENT) private readonly client: Redis) {}
+	constructor(@Inject(Redis) private readonly client: Redis) {}
 
 	async get<T>(key: string): Promise<T | null> {
 		const cached = await this.client.get(key);
