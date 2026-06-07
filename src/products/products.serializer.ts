@@ -4,6 +4,7 @@ import { Product } from './product.model';
 import { ProductResponseDto } from './dto';
 import { serializeOne, serializeMany, JsonApiSingleResponse, JsonApiCollectionResponse } from '../common/serializers';
 import { encodeCursor } from '../common/utils';
+import {PAGINATION_DEFAULTS} from "../common/constants";
 
 @Injectable()
 export class ProductsSerializer {
@@ -11,13 +12,16 @@ export class ProductsSerializer {
 		return serializeOne('products', product.productToken, this.toAttributes(product));
 	}
 
-	many(products: Product[], meta: Record<string, unknown>, nextLink: string | null): JsonApiCollectionResponse {
-		const items = products.map((p) => ({ id: p.productToken, attributes: this.toAttributes(p) }));
+	many(products: Product[], meta: Record<string, unknown>, nextLink: string | null, pt?: string): JsonApiCollectionResponse {
+		const items = products.map((p) => ({
+			id: pt === PAGINATION_DEFAULTS.CURSOR_TYPE ? encodeCursor(p.id) : p.productToken,
+			attributes: this.toAttributes(p)
+		}));
 		return serializeMany('products', items, meta, { next: nextLink });
 	}
 
 	cursorLink(pageSize: number, nextCursor: number | null): string | null {
-		return nextCursor ? `/products?pt=cursor&page[size]=${pageSize}&page[after]=${encodeCursor(nextCursor)}` : null;
+		return nextCursor ? `/products?pt=${PAGINATION_DEFAULTS.CURSOR_TYPE}&page[size]=${pageSize}&page[after]=${encodeCursor(nextCursor)}` : null;
 	}
 
 	offsetLink(page: number, limit: number, hasNext: boolean): string | null {
