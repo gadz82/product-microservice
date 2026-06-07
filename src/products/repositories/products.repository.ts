@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { Product } from './product.model';
-import { CreateProductDto } from './dto';
-import { CursorPaginationOptions, CursorPaginatedResult, OffsetPaginationOptions, OffsetPaginatedResult } from '../common/interfaces';
+import { Product } from '../models/product.model';
+import { CreateProductDto } from '../dto';
+import { CursorPaginationOptions, CursorPaginatedResult, OffsetPaginationOptions, OffsetPaginatedResult } from '../../common/pagination/interfaces/pagination.interfaces';
 
 @Injectable()
 export class ProductsRepository {

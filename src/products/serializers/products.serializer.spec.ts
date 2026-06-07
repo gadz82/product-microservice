@@ -1,5 +1,7 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsSerializer } from './products.serializer';
-import { Product } from './product.model';
+import { Product } from '../models/product.model';
+import { JsonApiSerializer } from '../../common/serializer/services/json-api.serializer';
 
 describe('ProductsSerializer', () => {
 	let serializer: ProductsSerializer;
@@ -15,8 +17,12 @@ describe('ProductsSerializer', () => {
 		toJSON: () => ({ id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100, createdAt: new Date('2026-01-01'), updatedAt: new Date('2026-01-01') })
 	} as unknown as Product;
 
-	beforeEach(() => {
-		serializer = new ProductsSerializer();
+	beforeEach(async () => {
+		const module: TestingModule = await Test.createTestingModule({
+			providers: [ProductsSerializer, JsonApiSerializer]
+		}).compile();
+
+		serializer = module.get<ProductsSerializer>(ProductsSerializer);
 	});
 
 	describe('one', () => {

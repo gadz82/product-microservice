@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { Product } from './product.model';
-import { ProductResponseDto } from './dto';
-import { serializeOne, serializeMany, JsonApiSingleResponse, JsonApiCollectionResponse } from '../common/serializers';
-import { encodeCursor } from '../common/utils';
-import {PAGINATION_DEFAULTS} from "../common/constants";
+import { Product } from '../models/product.model';
+import { ProductResponseDto } from '../dto';
+import { JsonApiSerializer } from '../../common/serializer/services/json-api.serializer';
+import { JsonApiSingleResponse, JsonApiCollectionResponse } from '../../common/serializer/interfaces/json-api.interface';
+import { encodeCursor } from '../../common/pagination/utils/cursor';
+import { PAGINATION_DEFAULTS } from '../../common/pagination/constants/pagination.constants';
 
 @Injectable()
 export class ProductsSerializer {
+	constructor(private readonly jsonApiSerializer: JsonApiSerializer) {}
+
 	one(product: Product): JsonApiSingleResponse {
-		return serializeOne('products', product.productToken, this.toAttributes(product));
+		return this.jsonApiSerializer.serializeOne('products', product.productToken, this.toAttributes(product));
 	}
 
 	many(products: Product[], meta: Record<string, unknown>, nextLink: string | null, pt?: string): JsonApiCollectionResponse {
@@ -17,7 +20,7 @@ export class ProductsSerializer {
 			id: pt === PAGINATION_DEFAULTS.CURSOR_TYPE ? encodeCursor(p.id) : p.productToken,
 			attributes: this.toAttributes(p)
 		}));
-		return serializeMany('products', items, meta, { next: nextLink });
+		return this.jsonApiSerializer.serializeMany('products', items, meta, { next: nextLink });
 	}
 
 	cursorLink(pageSize: number, nextCursor: number | null): string | null {

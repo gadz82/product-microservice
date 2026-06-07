@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
-import { PAGINATION_DEFAULTS, PAGINATION_TYPES } from '../constants';
+import { PAGINATION_DEFAULTS, PAGINATION_TYPES } from '../constants/pagination.constants';
 
 export type PaginationType = (typeof PAGINATION_TYPES)[number];
 

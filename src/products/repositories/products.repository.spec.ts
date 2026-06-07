@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/sequelize';
 import { ProductsRepository } from './products.repository';
-import { Product } from './product.model';
+import { Product } from '../models/product.model';
 
 describe('ProductsRepository', () => {
 	let repository: ProductsRepository;
