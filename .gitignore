@@ -1,6 +1,7 @@
-node_modules
-dist
+node_modules/
+dist/
+coverage/
 .env
-.idea
-coverage
+*.log
 .DS_Store
+.idea/
