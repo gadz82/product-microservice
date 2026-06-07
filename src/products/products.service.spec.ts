@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductsRepository } from './products.repository';
+import { encodeCursor } from '../common/utils';
 
 describe('ProductsService', () => {
 	let service: ProductsService;
@@ -41,19 +42,29 @@ describe('ProductsService', () => {
 		});
 	});
 
-	describe('findAll', () => {
-		it('should return cursor-paginated results', async () => {
-			mockRepository.findAll.mockResolvedValue({ data: [mockProduct], hasNext: false, nextCursor: null });
-			const result = await service.findAll(10);
-			expect(result).toEqual({ data: [mockProduct], hasNext: false, nextCursor: null });
-		});
-	});
-
-	describe('findAllOffset', () => {
-		it('should return offset-paginated results', async () => {
+	describe('list', () => {
+		it('should return offset-paginated results for pt=ol', async () => {
 			mockRepository.findAllOffset.mockResolvedValue({ data: [mockProduct], total: 1, page: 1, limit: 10 });
-			const result = await service.findAllOffset(1, 10);
-			expect(result).toEqual({ data: [mockProduct], total: 1, page: 1, limit: 10 });
+			const result = await service.list('ol', 1, 10);
+			expect(result.meta).toHaveProperty('total', 1);
+			expect(result.meta).toHaveProperty('page', 1);
+		});
+
+		it('should return cursor-paginated results for pt=cursor', async () => {
+			mockRepository.findAll.mockResolvedValue({ data: [mockProduct], hasNext: false, nextCursor: null });
+			const result = await service.list('cursor', undefined, undefined, 10);
+			expect(result.meta).toHaveProperty('hasNext', false);
+			expect(result.nextCursor).toBeNull();
+		});
+
+		it('should decode base64 cursor', async () => {
+			mockRepository.findAll.mockResolvedValue({ data: [], hasNext: false, nextCursor: null });
+			await service.list('cursor', undefined, undefined, 10, encodeCursor(5));
+			expect(mockRepository.findAll).toHaveBeenCalledWith({ size: 10, after: 5 });
+		});
+
+		it('should throw BadRequestException on invalid cursor', async () => {
+			await expect(service.list('cursor', undefined, undefined, 10, 'not-valid')).rejects.toThrow(BadRequestException);
 		});
 	});
 
