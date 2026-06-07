@@ -25,9 +25,16 @@ integration-test: up migrate
 migrate:
 	npm run db:migrate
 
-smoke-test: up migrate
+smoke-test:
+	npm ci
+	npm run build
+	npm run run-unit-test
+	docker compose up -d
+	@echo "Waiting for services to be healthy..."
+	@docker compose exec mysql mysqladmin ping -h localhost --silent || sleep 5
+	npm run db:migrate
 	@sleep 3
-	@curl -sf http://localhost:3000/products?page=1&limit=1 > /dev/null && echo "Smoke test passed" || echo "Smoke test failed"
+	npm run run-integration-test
 
 logs:
 	docker compose logs -f
