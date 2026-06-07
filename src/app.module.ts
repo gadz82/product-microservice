@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { configuration, validate } from './config';
-import { DatabaseModule } from './database/database.module';
+import { CommonModule } from './common/common.module';
+import { configuration, validate } from './common/config';
 import { ProductsModule } from './products/products.module';
 
 @Module({
@@ -11,7 +11,7 @@ import { ProductsModule } from './products/products.module';
 			load: [configuration],
 			validate
 		}),
-		DatabaseModule,
+		CommonModule,
 		ProductsModule
 	],
 	controllers: [],

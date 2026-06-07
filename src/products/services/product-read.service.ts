@@ -1,0 +1,64 @@
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ProductsRepository } from '../repositories/products.repository';
+import { Product } from '../models/product.model';
+import { PaginationType, decodeCursor, PAGINATION_DEFAULTS } from '../../common/pagination';
+import { RedisLazyCacheService } from '../../common/cache';
+import { PaginatedProducts } from '../interfaces/paginated-products.interface';
+
+@Injectable()
+export class ProductReadService {
+	constructor(
+		private readonly productsRepository: ProductsRepository,
+		private readonly cacheService: RedisLazyCacheService
+	) {}
+
+	async list(pt: PaginationType, page?: number, limit?: number, size?: number, after?: string): Promise<PaginatedProducts> {
+		const cacheKey = `product:list:${pt}:${page ?? ''}:${limit ?? ''}:${size ?? ''}:${after ?? ''}`;
+		const cached = await this.cacheService.get<PaginatedProducts>(cacheKey);
+		if (cached) return cached;
+
+		let result: PaginatedProducts;
+		if (pt === PAGINATION_DEFAULTS.CURSOR_TYPE) {
+			const pageSize = size ?? PAGINATION_DEFAULTS.SIZE;
+			let afterId: number | undefined;
+			if (after) {
+				try {
+					afterId = decodeCursor(after);
+				} catch {
+					throw new BadRequestException('Invalid cursor');
+				}
+			}
+			const repoResult = await this.productsRepository.findAll({ size: pageSize, after: afterId });
+			result = { data: repoResult.data, meta: { hasNext: repoResult.hasNext }, nextCursor: repoResult.nextCursor };
+		} else {
+			const pageNum = page ?? PAGINATION_DEFAULTS.PAGE;
+			const pageLimit = limit ?? PAGINATION_DEFAULTS.LIMIT;
+			const repoResult = await this.productsRepository.findAllOffset({ page: pageNum, limit: pageLimit });
+			const hasNext = repoResult.page * repoResult.limit < repoResult.total;
+			result = {
+				data: repoResult.data,
+				meta: { hasNext, total: repoResult.total, page: repoResult.page, limit: repoResult.limit },
+				nextCursor: null,
+				page: repoResult.page,
+				limit: repoResult.limit
+			};
+		}
+
+		await this.cacheService.set(cacheKey, result);
+		return result;
+	}
+
+	async findOneByToken(token: string): Promise<Product> {
+		const cacheKey = `product:detail:${token}`;
+		const cached = await this.cacheService.get<Product>(cacheKey);
+		if (cached) return cached;
+
+		const product = await this.productsRepository.findByToken(token);
+		if (!product) {
+			throw new NotFoundException(`Product with token "${token}" not found`);
+		}
+
+		await this.cacheService.set(cacheKey, product);
+		return product;
+	}
+}

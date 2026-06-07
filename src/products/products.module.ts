@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Product } from './product.model';
-import { ProductsRepository } from './products.repository';
-import { ProductsService } from './products.service';
-import { ProductsSerializer } from './products.serializer';
-import { ProductsController } from './products.controller';
+import { Product } from './models/product.model';
+import { ProductsRepository } from './repositories/products.repository';
+import { ProductReadService } from './services/product-read.service';
+import { ProductWriteService } from './services/product-write.service';
+import { ProductsSerializer } from './serializers/products.serializer';
+import { ProductsController } from './controllers/products.controller';
+import { CommonModule } from '../common/common.module';
 
 @Module({
-	imports: [SequelizeModule.forFeature([Product])],
+	imports: [SequelizeModule.forFeature([Product]), CommonModule],
 	controllers: [ProductsController],
-	providers: [ProductsRepository, ProductsService, ProductsSerializer],
-	exports: [ProductsService]
+	providers: [ProductsRepository, ProductReadService, ProductWriteService, ProductsSerializer],
+	exports: [ProductReadService]
 })
 export class ProductsModule {}
