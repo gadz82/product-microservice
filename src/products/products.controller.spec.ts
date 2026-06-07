@@ -5,6 +5,15 @@ import { ProductsService } from './products.service';
 describe('ProductsController', () => {
 	let controller: ProductsController;
 
+	const mockProduct = {
+		id: 1,
+		productToken: 'tok-1',
+		name: 'Widget',
+		price: 9.99,
+		stock: 100,
+		toJSON: (): Record<string, unknown> => ({ id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100 })
+	};
+
 	const mockService = {
 		create: jest.fn(),
 		findAll: jest.fn(),
@@ -24,36 +33,56 @@ describe('ProductsController', () => {
 	});
 
 	describe('create', () => {
-		it('should delegate to service and return created product', async () => {
-			const dto = { name: 'Widget', productToken: 'tok-1', price: 9.99, stock: 10 };
-			mockService.create.mockResolvedValue({ id: 1, ...dto });
-			const result = await controller.create(dto);
-			expect(result).toEqual({ id: 1, ...dto });
-			expect(mockService.create).toHaveBeenCalledWith(dto);
+		it('should return JSON:API single resource format', async () => {
+			mockService.create.mockResolvedValue(mockProduct);
+			const result = await controller.create({ name: 'Widget', productToken: 'tok-1', price: 9.99, stock: 100 });
+			expect(result.data.type).toBe('products');
+			expect(result.data.id).toBe('1');
+			expect(result.data.attributes).toHaveProperty('name', 'Widget');
 		});
 	});
 
 	describe('findAll', () => {
-		it('should return paginated products', async () => {
-			mockService.findAll.mockResolvedValue({ data: [], total: 0, page: 1, limit: 10 });
-			const result = await controller.findAll(1, 10);
-			expect((result as { data: unknown[] }).data).toEqual([]);
+		it('should return JSON:API collection with cursor pagination', async () => {
+			mockService.findAll.mockResolvedValue({ data: [mockProduct], hasNext: true, nextCursor: 1 });
+			const result = await controller.findAll(10, undefined, undefined);
+			expect(result.data).toHaveLength(1);
+			expect(result.meta.hasNext).toBe(true);
+			expect(result.links.next).toContain('page[after]=1');
+		});
+
+		it('should support sparse fieldsets', async () => {
+			const sparseProduct = {
+				id: 1,
+				name: 'Widget',
+				price: 9.99,
+				toJSON: (): Record<string, unknown> => ({ id: 1, name: 'Widget', price: 9.99 })
+			};
+			mockService.findAll.mockResolvedValue({ data: [sparseProduct], hasNext: false, nextCursor: null });
+			const result = await controller.findAll(10, undefined, 'name,price');
+			expect(result.data[0].attributes).toEqual({ name: 'Widget', price: 9.99 });
 		});
 	});
 
 	describe('findOne', () => {
-		it('should return a single product by id', async () => {
-			mockService.findOne.mockResolvedValue({ id: 1, name: 'Widget' });
-			const result = await controller.findOne(1);
-			expect(result).toEqual({ id: 1, name: 'Widget' });
+		it('should return JSON:API single resource format', async () => {
+			mockService.findOne.mockResolvedValue(mockProduct);
+			const result = await controller.findOne(1, undefined);
+			expect(result.data.type).toBe('products');
+			expect(result.data.id).toBe('1');
 		});
 	});
 
 	describe('updateStock', () => {
-		it('should update stock for given product', async () => {
-			mockService.updateStock.mockResolvedValue({ id: 1, stock: 50 });
+		it('should return JSON:API single resource format', async () => {
+			const updated = {
+				...mockProduct,
+				stock: 50,
+				toJSON: (): Record<string, unknown> => ({ id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 50 })
+			};
+			mockService.updateStock.mockResolvedValue(updated);
 			const result = await controller.updateStock(1, { stock: 50 });
-			expect(result).toEqual({ id: 1, stock: 50 });
+			expect(result.data.attributes).toHaveProperty('stock', 50);
 		});
 	});
 
