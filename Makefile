@@ -1,6 +1,7 @@
 .PHONY: up down build test unit-test integration-test migrate smoke-test logs clean dev
 
 up:
+	npm i
 	docker compose up -d
 	@echo "Waiting for services to be healthy..."
 	@docker compose exec mysql mysqladmin ping -h localhost --silent || sleep 5
