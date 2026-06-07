@@ -10,6 +10,9 @@
     "lint": "eslint \"{src,test}/**/*.ts\" --max-warnings=0",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "db:migration:generate": "npx sequelize-cli migration:generate --name",
     "prepare": "husky"
   },
   "keywords": [],
@@ -21,8 +24,12 @@
     "@nestjs/config": "4.0.4",
     "@nestjs/core": "11.1.24",
     "@nestjs/platform-express": "11.1.24",
+    "@nestjs/sequelize": "11.0.1",
+    "mysql2": "3.22.5",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
+    "sequelize": "6.37.8",
+    "sequelize-typescript": "2.1.6",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -36,6 +43,7 @@
     "eslint-plugin-prettier": "5.5.6",
     "husky": "9.1.7",
     "prettier": "3.8.3",
+    "sequelize-cli": "6.6.5",
     "ts-loader": "9.6.0",
     "ts-node": "10.9.2",
     "typescript": "6.0.3"
