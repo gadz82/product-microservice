@@ -1,0 +1,158 @@
+{
+	"info": {
+		"name": "Products CRUD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 201', () => pm.response.to.have.status(201));",
+							"const json = pm.response.json();",
+							"pm.test('Has JSON:API data wrapper', () => pm.expect(json.data).to.be.an('object'));",
+							"pm.test('Type is products', () => pm.expect(json.data.type).to.eql('products'));",
+							"pm.test('Has id', () => pm.expect(json.data.id).to.be.a('string'));",
+							"pm.test('Attributes has name', () => pm.expect(json.data.attributes.name).to.eql('Integration Widget'));",
+							"pm.test('Attributes has productToken', () => pm.expect(json.data.attributes.productToken).to.eql('int-test-token'));",
+							"pm.collectionVariables.set('productId', json.data.id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"Integration Widget\", \"productToken\": \"int-test-token\", \"price\": 19.99, \"stock\": 50}"
+				},
+				"url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+			}
+		},
+		{
+			"name": "List Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+							"const json = pm.response.json();",
+							"pm.test('Has data array', () => pm.expect(json.data).to.be.an('array'));",
+							"pm.test('Has meta with hasNext', () => pm.expect(json.meta).to.have.property('hasNext'));",
+							"pm.test('Has links with next', () => pm.expect(json.links).to.have.property('next'));",
+							"pm.test('Data items have JSON:API structure', () => { const item = json.data[0]; pm.expect(item.type).to.eql('products'); pm.expect(item.id).to.be.a('string'); pm.expect(item.attributes).to.be.an('object'); });"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"url": { "raw": "{{baseUrl}}/products?page[size]=10", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "page[size]", "value": "10" }] }
+			}
+		},
+		{
+			"name": "List Products with Sparse Fieldsets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+							"const json = pm.response.json();",
+							"pm.test('Attributes only contain requested fields', () => { const attrs = json.data[0].attributes; pm.expect(attrs).to.have.property('name'); pm.expect(attrs).to.have.property('price'); pm.expect(attrs).to.not.have.property('stock'); pm.expect(attrs).to.not.have.property('productToken'); });"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"url": { "raw": "{{baseUrl}}/products?fields[products]=name,price", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "fields[products]", "value": "name,price" }] }
+			}
+		},
+		{
+			"name": "Get Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+							"const json = pm.response.json();",
+							"pm.test('Type is products', () => pm.expect(json.data.type).to.eql('products'));",
+							"pm.test('Correct id', () => pm.expect(json.data.id).to.eql(pm.collectionVariables.get('productId')));",
+							"pm.test('Has productToken in attributes', () => pm.expect(json.data.attributes.productToken).to.eql('int-test-token'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}"] }
+			}
+		},
+		{
+			"name": "Update Stock",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+							"const json = pm.response.json();",
+							"pm.test('JSON:API format', () => pm.expect(json.data.type).to.eql('products'));",
+							"pm.test('Stock updated in attributes', () => pm.expect(json.data.attributes.stock).to.eql(75));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\"stock\": 75}" },
+				"url": { "raw": "{{baseUrl}}/products/{{productId}}/stock", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}", "stock"] }
+			}
+		},
+		{
+			"name": "Delete Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 204', () => pm.response.to.have.status(204));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}"] }
+			}
+		},
+		{
+			"name": "Get Deleted Product (404)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 404', () => pm.response.to.have.status(404));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}"] }
+			}
+		}
+	],
+	"variable": [
+		{ "key": "productId", "value": "" }
+	]
+}
