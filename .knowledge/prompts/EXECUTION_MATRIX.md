@@ -18,7 +18,7 @@ Prompts MUST be executed in sequential order. Each depends on the previous.
 | 0 | Project Scaffolding | `PROMPT_00_PROJECT_SCAFFOLDING.md` | — | `tsconfig.json`, `src/main.ts`, `src/app.module.ts`, `.eslintrc.js`, `.prettierrc`, `.husky/pre-commit` |
 | 1 | Docker Compose | `PROMPT_01_DOCKER_COMPOSE.md` | #0 | `Dockerfile`, `docker-compose.yml`, `docker-compose.dev.yml`, `.env.example`, `.dockerignore` |
 | 2 | Configuration | `PROMPT_02_CONFIGURATION.md` | #0 | `src/config/env.validation.ts`, `src/config/configuration.ts`, `src/config/index.ts` |
-| 3 | Sequelize Setup | `PROMPT_03_SEQUELIZE_SETUP.md` | #2 | `src/database/database.module.ts`, `.sequelizerc`, `database/` migrations + config |
+| 3 | Sequelize Setup | `PROMPT_03_SEQUELIZE_SETUP.md` | #2 | `src/common/database/database.module.ts`, `database/` migrations + config |
 | 4 | Products Module | `PROMPT_04_PRODUCTS_MODULE.md` | #3 | `src/products/` (model, service, controller, DTOs, module) |
 | 4B | Repository + JSON:API | `PROMPT_04B_REPOSITORY_JSONAPI.md` | #4, #5 | `src/products/products.repository.ts`, `src/common/serializers/`, cursor pagination |
 | 4C | Dual Pagination | `PROMPT_04C_DUAL_PAGINATION.md` | #4B | `src/common/pipes/`, dual pagination (offset-limit default + cursor opt-in via `pt` param) |

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { JsonApiResource, JsonApiSingleResponse, JsonApiCollectionResponse } from '../interfaces/json-api.interface';
+import { JsonApiSingleResponse, JsonApiCollectionResponse } from '../interfaces/json-api.interface';
 
 @Injectable()
 export class JsonApiSerializer {

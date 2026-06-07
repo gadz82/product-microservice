@@ -56,6 +56,7 @@ All detailed specs and execution prompts live in `.knowledge/`:
 └── prompts/
     ├── EXECUTION_MATRIX.md    ← Dependency graph & progress tracking
     └── PROMPT_00..09          ← Idempotent implementation steps
+database/                      ← Sequelize migrations & configuration
 ```
 
 ## How to Work on This Project

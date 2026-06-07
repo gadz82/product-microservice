@@ -8,7 +8,7 @@ This directory contains the core domain logic for Product management.
 - `dto/`: Request validation schemas.
 - `interfaces/`: Shared interfaces (e.g., `PaginatedProducts`).
 - `models/`: `product.model.ts` Sequelize model.
-- `repositories/`: `products.repository.ts` data access layer.
+- `repositories/`: `products.repository.ts` data access layer (supports `buildFromCache`).
 - `serializers/`: `products.serializer.ts` for JSON:API compliance.
 - `services/`:
   - `product-read.service.ts`: Handles GET operations and listing.

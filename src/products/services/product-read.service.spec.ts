@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ProductReadService } from './product-read.service';
 import { ProductsRepository } from '../repositories/products.repository';
-import { encodeCursor } from '../../common/pagination/utils/cursor';
-import { RedisLazyCacheService } from '../../common/cache/services/redis-lazy-cache.service';
+import { encodeCursor } from '../../common/pagination';
+import { RedisLazyCacheService } from '../../common/cache';
 
 describe('ProductReadService', () => {
 	let service: ProductReadService;

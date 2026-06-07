@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsSerializer } from './products.serializer';
 import { Product } from '../models/product.model';
-import { JsonApiSerializer } from '../../common/serializer/services/json-api.serializer';
+import { JsonApiSerializer } from '../../common/serializer';
 
 describe('ProductsSerializer', () => {
 	let serializer: ProductsSerializer;

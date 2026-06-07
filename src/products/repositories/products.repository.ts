@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { Product } from '../models/product.model';
 import { CreateProductDto } from '../dto';
-import { CursorPaginationOptions, CursorPaginatedResult, OffsetPaginationOptions, OffsetPaginatedResult } from '../../common/pagination/interfaces/pagination.interfaces';
+import { CursorPaginationOptions, CursorPaginatedResult, OffsetPaginationOptions, OffsetPaginatedResult } from '../../common/pagination';
 
 @Injectable()
 export class ProductsRepository {

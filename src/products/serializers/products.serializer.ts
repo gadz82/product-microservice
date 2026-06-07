@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { Product } from '../models/product.model';
 import { ProductResponseDto } from '../dto';
-import { JsonApiSerializer } from '../../common/serializer/services/json-api.serializer';
-import { JsonApiSingleResponse, JsonApiCollectionResponse } from '../../common/serializer/interfaces/json-api.interface';
-import { encodeCursor } from '../../common/pagination/utils/cursor';
-import { PAGINATION_DEFAULTS } from '../../common/pagination/constants/pagination.constants';
+import { JsonApiSerializer } from '../../common/serializer';
+import { JsonApiSingleResponse, JsonApiCollectionResponse } from '../../common/serializer';
+import { encodeCursor } from '../../common/pagination';
+import { PAGINATION_DEFAULTS } from '../../common/pagination';
 
 @Injectable()
 export class ProductsSerializer {

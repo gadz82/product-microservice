@@ -3,7 +3,7 @@ import { ConflictException } from '@nestjs/common';
 import { ProductWriteService } from './product-write.service';
 import { ProductReadService } from './product-read.service';
 import { ProductsRepository } from '../repositories/products.repository';
-import { RedisLazyCacheService } from '../../common/cache/services/redis-lazy-cache.service';
+import { RedisLazyCacheService } from '../../common/cache';
 
 describe('ProductWriteService', () => {
 	let service: ProductWriteService;

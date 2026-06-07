@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { CacheModule } from './cache/cache.module';
+import { CacheModule } from './cache';
 import { DatabaseModule } from './database/database.module';
-import { PaginationModule } from './pagination/pagination.module';
-import { JsonApiModule } from './serializer/json-api.module';
+import { PaginationModule } from './pagination';
+import { JsonApiModule } from './serializer';
 
 @Module({
 	imports: [CacheModule, DatabaseModule, PaginationModule, JsonApiModule],
