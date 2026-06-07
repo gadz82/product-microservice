@@ -199,7 +199,7 @@ variables:
 
 install:
   stage: install
-  image: node:20-alpine
+  image: node:22-alpine
   script:
     - npm ci
   artifacts:
@@ -209,14 +209,14 @@ install:
 
 audit:
   stage: audit
-  image: node:20-alpine
+  image: node:22-alpine
   needs: [install]
   script:
     - npm audit --audit-level=high
 
 build:
   stage: build
-  image: node:20-alpine
+  image: node:22-alpine
   needs: [install]
   script:
     - npm run build
@@ -231,7 +231,7 @@ build:
 
 unit-test:
   stage: test
-  image: node:20-alpine
+  image: node:22-alpine
   needs: [install]
   script:
     - npm run run-unit-test
@@ -243,7 +243,7 @@ unit-test:
 
 integration-test:
   stage: test
-  image: node:20-alpine
+  image: node:22-alpine
   needs: [install, build]
   services:
     - name: mysql:8.0
@@ -258,14 +258,14 @@ integration-test:
 
 sast:
   stage: sast
-  image: node:20-alpine
+  image: node:22-alpine
   needs: [install]
   script:
     - npx eslint "src/**/*.ts" --max-warnings=0
 
 deploy:
   stage: deploy
-  image: node:20-alpine
+  image: node:22-alpine
   needs: [unit-test, integration-test, sast]
   only:
     - main

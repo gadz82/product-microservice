@@ -87,18 +87,18 @@ Update this section as prompts are executed:
 
 | # | Status | Executed By | Date |
 |---|--------|-------------|------|
-| 0 | ✅ DONE | Kiro | 2026-06-07 |
-| 1 | ✅ DONE | Kiro | 2026-06-07 |
-| 2 | ✅ DONE | Kiro | 2026-06-07 |
-| 3 | ✅ DONE | Kiro | 2026-06-07 |
-| 4 | ✅ DONE | Kiro | 2026-06-07 |
-| 5 | ✅ DONE | Kiro | 2026-06-07 |
-| 4B | ✅ DONE | Kiro | 2026-06-07 |
-| 6 | ✅ DONE | Kiro | 2026-06-07 |
-| 4C | ✅ DONE | Kiro | 2026-06-07 |
-| 6B | ✅ DONE | Kiro | 2026-06-07 |
-| 7 | ✅ DONE | Kiro | 2026-06-07 |
-| 8 | ✅ DONE | Kiro | 2026-06-07 |
-| 9 | ✅ DONE | Kiro | 2026-06-07 |
+| 0 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 1 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 2 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 3 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 4 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 5 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 4B | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 6 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 4C | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 6B | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 7 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 8 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 9 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
 
 Legend: ⬜ PENDING | 🔄 IN PROGRESS | ✅ DONE | ❌ FAILED

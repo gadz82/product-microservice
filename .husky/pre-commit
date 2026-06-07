@@ -1,3 +1,1 @@
-#!/usr/bin/env sh
-npx prettier --check "src/**/*.ts"
-npx eslint "src/**/*.ts" --max-warnings=0
+npm run run-unit-test
