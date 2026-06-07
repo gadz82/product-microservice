@@ -22,40 +22,30 @@ export class ProductsController {
 		@Query('page', new ParseIntPipe({ optional: true })) page?: number,
 		@Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
 		@Query('page[size]', new ParseIntPipe({ optional: true })) size?: number,
-		@Query('page[after]', new ParseIntPipe({ optional: true })) after?: number,
-		@Query('fields[products]') fields?: string
+		@Query('page[after]', new ParseIntPipe({ optional: true })) after?: number
 	): Promise<JsonApiCollectionResponse> {
-		const parsedFields = fields ? fields.split(',').map((f) => f.trim()) : undefined;
-
 		if (pt === 'cursor') {
 			const pageSize = size ?? 10;
-			const { data, hasNext, nextCursor } = await this.productsService.findAll(pageSize, after, parsedFields);
+			const { data, hasNext, nextCursor } = await this.productsService.findAll(pageSize, after);
 			const items = data.map((p) => p.toJSON() as { id: number; [key: string]: unknown });
 			const nextLink = nextCursor ? `/products?pt=cursor&page[size]=${pageSize}&page[after]=${nextCursor}` : null;
-			return serializeMany('products', items, { hasNext }, { next: nextLink }, parsedFields);
+			return serializeMany('products', items, { hasNext }, { next: nextLink });
 		}
 
 		const pageNum = page ?? 1;
 		const pageLimit = limit ?? 10;
-		const result = await this.productsService.findAllOffset(pageNum, pageLimit, parsedFields);
+		const result = await this.productsService.findAllOffset(pageNum, pageLimit);
 		const items = result.data.map((p) => p.toJSON() as { id: number; [key: string]: unknown });
 		const hasNext = result.page * result.limit < result.total;
 		const nextLink = hasNext ? `/products?page=${result.page + 1}&limit=${result.limit}` : null;
-		return serializeMany(
-			'products',
-			items,
-			{ hasNext, total: result.total, page: result.page, limit: result.limit },
-			{ next: nextLink },
-			parsedFields
-		);
+		return serializeMany('products', items, { hasNext, total: result.total, page: result.page, limit: result.limit }, { next: nextLink });
 	}
 
 	@Get(':id')
-	async findOne(@Param('id', ParseIntPipe) id: number, @Query('fields[products]') fields?: string): Promise<JsonApiSingleResponse> {
-		const parsedFields = fields ? fields.split(',').map((f) => f.trim()) : undefined;
-		const product = await this.productsService.findOne(id, parsedFields);
+	async findOne(@Param('id', ParseIntPipe) id: number): Promise<JsonApiSingleResponse> {
+		const product = await this.productsService.findOne(id);
 		const { id: productId, ...attributes } = product.toJSON();
-		return serializeOne('products', productId, attributes, parsedFields);
+		return serializeOne('products', productId, attributes);
 	}
 
 	@Patch(':id/stock')

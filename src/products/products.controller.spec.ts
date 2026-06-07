@@ -46,38 +46,26 @@ describe('ProductsController', () => {
 	describe('findAll', () => {
 		it('should use offset-limit by default (pt=ol)', async () => {
 			mockService.findAllOffset.mockResolvedValue({ data: [mockProduct], total: 1, page: 1, limit: 10 });
-			const result = await controller.findAll('ol', 1, 10, undefined, undefined, undefined);
+			const result = await controller.findAll('ol', 1, 10, undefined, undefined);
 			expect(result.meta).toHaveProperty('total', 1);
 			expect(result.meta).toHaveProperty('page', 1);
-			expect(mockService.findAllOffset).toHaveBeenCalledWith(1, 10, undefined);
+			expect(mockService.findAllOffset).toHaveBeenCalledWith(1, 10);
 		});
 
 		it('should use cursor pagination when pt=cursor', async () => {
 			mockService.findAll.mockResolvedValue({ data: [mockProduct], hasNext: true, nextCursor: 1 });
-			const result = await controller.findAll('cursor', undefined, undefined, 10, undefined, undefined);
+			const result = await controller.findAll('cursor', undefined, undefined, 10, undefined);
 			expect(result.meta).toHaveProperty('hasNext', true);
 			expect(result.meta).not.toHaveProperty('total');
 			expect(result.links.next).toContain('pt=cursor');
 			expect(result.links.next).toContain('page[after]=1');
-		});
-
-		it('should support sparse fieldsets', async () => {
-			const sparseProduct = {
-				id: 1,
-				name: 'Widget',
-				price: 9.99,
-				toJSON: (): Record<string, unknown> => ({ id: 1, name: 'Widget', price: 9.99 })
-			};
-			mockService.findAllOffset.mockResolvedValue({ data: [sparseProduct], total: 1, page: 1, limit: 10 });
-			const result = await controller.findAll('ol', 1, 10, undefined, undefined, 'name,price');
-			expect(result.data[0].attributes).toEqual({ name: 'Widget', price: 9.99 });
 		});
 	});
 
 	describe('findOne', () => {
 		it('should return JSON:API single resource format', async () => {
 			mockService.findOne.mockResolvedValue(mockProduct);
-			const result = await controller.findOne(1, undefined);
+			const result = await controller.findOne(1);
 			expect(result.data.type).toBe('products');
 			expect(result.data.id).toBe('1');
 		});

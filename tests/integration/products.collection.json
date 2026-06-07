@@ -52,26 +52,7 @@
 			],
 			"request": {
 				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products?page[size]=10", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "page[size]", "value": "10" }] }
-			}
-		},
-		{
-			"name": "List Products with Sparse Fieldsets",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
-							"const json = pm.response.json();",
-							"pm.test('Attributes only contain requested fields', () => { const attrs = json.data[0].attributes; pm.expect(attrs).to.have.property('name'); pm.expect(attrs).to.have.property('price'); pm.expect(attrs).to.not.have.property('stock'); pm.expect(attrs).to.not.have.property('productToken'); });"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"url": { "raw": "{{baseUrl}}/products?fields[products]=name,price", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "fields[products]", "value": "name,price" }] }
+				"url": { "raw": "{{baseUrl}}/products?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
 			}
 		},
 		{

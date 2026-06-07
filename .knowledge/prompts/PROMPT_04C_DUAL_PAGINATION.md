@@ -97,22 +97,20 @@ async findAll(
 	@Query('page', new ParseIntPipe({ optional: true })) page?: number,
 	@Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
 	@Query('page[size]', new ParseIntPipe({ optional: true })) size?: number,
-	@Query('page[after]', new ParseIntPipe({ optional: true })) after?: number,
-	@Query('fields[products]') fields?: string
+	@Query('page[after]', new ParseIntPipe({ optional: true })) after?: number
 ): Promise<JsonApiCollectionResponse> {
-	const parsedFields = fields ? fields.split(',').map((f) => f.trim()) : undefined;
 
 	if (pt === 'cursor') {
 		const pageSize = size ?? 10;
-		const { data, hasNext, nextCursor } = await this.productsService.findAll(pageSize, after, parsedFields);
+		const { data, hasNext, nextCursor } = await this.productsService.findAll(pageSize, after);
 		const items = data.map((p) => p.toJSON() as { id: number; [key: string]: unknown });
 		const nextLink = nextCursor ? `/products?pt=cursor&page[size]=${pageSize}&page[after]=${nextCursor}` : null;
-		return serializeMany('products', items, { hasNext }, { next: nextLink }, parsedFields);
+		return serializeMany('products', items, { hasNext }, { next: nextLink });
 	}
 
 	const pageNum = page ?? 1;
 	const pageLimit = limit ?? 10;
-	const { data, total, page: currentPage, limit: currentLimit } = await this.productsService.findAllOffset(pageNum, pageLimit, parsedFields);
+	const { data, total, page: currentPage, limit: currentLimit } = await this.productsService.findAllOffset(pageNum, pageLimit);
 	const items = data.map((p) => p.toJSON() as { id: number; [key: string]: unknown });
 	const hasNext = currentPage * currentLimit < total;
 	const nextLink = hasNext ? `/products?page=${currentPage + 1}&limit=${currentLimit}` : null;

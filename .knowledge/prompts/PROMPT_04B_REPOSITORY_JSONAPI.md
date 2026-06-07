@@ -8,7 +8,6 @@ Before executing, verify:
 - [ ] `src/common/serializers/json-api.serializer.ts` exists
 - [ ] All GET responses follow JSON:API format (`{ data, meta?, links? }`)
 - [ ] GET `/products` supports cursor-based pagination (`?page[size]`, `?page[after]`)
-- [ ] GET `/products` and GET `/products/:id` support sparse fieldsets (`?fields[products]=name,price`)
 - [ ] Unit tests updated for repository pattern and new response shapes
 - [ ] All tests pass with `npm run run-unit-test`
 
@@ -21,8 +20,7 @@ If ALL checks pass → mark as DONE. Otherwise, implement missing parts.
 Refactor the Products module to:
 1. **Repository Pattern** — extract all Sequelize data access into `ProductsRepository`, service depends only on the repository interface
 2. **JSON:API response format** — all responses follow [JSON:API](https://jsonapi.org/) structure
-3. **Sparse fieldsets** — allow clients to request specific fields via `?fields[products]=name,price`
-4. **Cursor-based pagination** — replace offset pagination with cursor-based (using `id` as cursor)
+3. **Cursor-based pagination** — replace offset pagination with cursor-based (using `id` as cursor)
 
 ## Implementation Steps
 
@@ -216,23 +214,20 @@ export class ProductsController {
 	@Get()
 	async findAll(
 		@Query('page[size]', new ParseIntPipe({ optional: true })) size?: number,
-		@Query('page[after]', new ParseIntPipe({ optional: true })) after?: number,
-		@Query('fields[products]') fields?: string
+		@Query('page[after]', new ParseIntPipe({ optional: true })) after?: number
 	): Promise<JsonApiCollectionResponse> {
-		const parsedFields = fields ? fields.split(',').map((f) => f.trim()) : undefined;
 		const pageSize = size ?? 10;
-		const { data, hasNext, nextCursor } = await this.productsService.findAll(pageSize, after, parsedFields);
+		const { data, hasNext, nextCursor } = await this.productsService.findAll(pageSize, after);
 		const items = data.map((p) => p.toJSON() as { id: number; [key: string]: unknown });
 		const nextLink = nextCursor ? `/products?page[size]=${pageSize}&page[after]=${nextCursor}` : null;
-		return serializeMany('products', items, { hasNext }, { next: nextLink }, parsedFields);
+		return serializeMany('products', items, { hasNext }, { next: nextLink });
 	}
 
 	@Get(':id')
-	async findOne(@Param('id', ParseIntPipe) id: number, @Query('fields[products]') fields?: string): Promise<JsonApiSingleResponse> {
-		const parsedFields = fields ? fields.split(',').map((f) => f.trim()) : undefined;
-		const product = await this.productsService.findOne(id, parsedFields);
+	async findOne(@Param('id', ParseIntPipe) id: number): Promise<JsonApiSingleResponse> {
+		const product = await this.productsService.findOne(id);
 		const { id: productId, ...attributes } = product.toJSON();
-		return serializeOne('products', productId, attributes, parsedFields);
+		return serializeOne('products', productId, attributes);
 	}
 
 	@Patch(':id/stock')
@@ -416,7 +411,7 @@ describe('ProductsController', () => {
 	describe('findOne', () => {
 		it('should return JSON:API single resource format', async () => {
 			mockService.findOne.mockResolvedValue(mockProduct);
-			const result = await controller.findOne(1, undefined);
+			const result = await controller.findOne(1);
 			expect(result.data.type).toBe('products');
 			expect(result.data.id).toBe('1');
 		});
@@ -456,10 +451,6 @@ describe('JsonApiSerializer', () => {
 			expect(result.data.attributes).toEqual({ name: 'Widget', price: 9.99 });
 		});
 
-		it('should apply sparse fieldsets', () => {
-			const result = serializeOne('products', 1, { name: 'Widget', price: 9.99, stock: 10 }, ['name']);
-			expect(result.data.attributes).toEqual({ name: 'Widget' });
-		});
 	});
 
 	describe('serializeMany', () => {
@@ -471,11 +462,6 @@ describe('JsonApiSerializer', () => {
 			expect(result.links.next).toBe('/products?page[after]=2');
 		});
 
-		it('should apply sparse fieldsets to collection', () => {
-			const items = [{ id: 1, name: 'A', price: 1, stock: 5 }];
-			const result = serializeMany('products', items, { hasNext: false }, { next: null }, ['name']);
-			expect(result.data[0].attributes).toEqual({ name: 'A' });
-		});
 	});
 });
 ```
@@ -493,5 +479,5 @@ npm run run-unit-test
 
 ```bash
 git add -A
-git commit -m "refactor(products): add repository pattern, JSON:API responses, sparse fieldsets, cursor pagination"
+git commit -m "refactor(products): add repository pattern, JSON:API responses, cursor pagination"
 ```

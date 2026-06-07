@@ -14,30 +14,19 @@ export interface JsonApiCollectionResponse {
 	links: { next: string | null };
 }
 
-export function serializeOne(type: string, id: number, attributes: Record<string, unknown>, fields?: string[]): JsonApiSingleResponse {
-	const filtered = fields ? pickFields(attributes, fields) : attributes;
-	return { data: { type, id: String(id), attributes: filtered } };
+export function serializeOne(type: string, id: number, attributes: Record<string, unknown>): JsonApiSingleResponse {
+	return { data: { type, id: String(id), attributes } };
 }
 
 export function serializeMany(
 	type: string,
 	items: { id: number; [key: string]: unknown }[],
 	meta: Record<string, unknown>,
-	links: { next: string | null },
-	fields?: string[]
+	links: { next: string | null }
 ): JsonApiCollectionResponse {
 	const data = items.map((item) => {
-		const { id, ...rest } = item;
-		const attributes = fields ? pickFields(rest, fields) : rest;
+		const { id, ...attributes } = item;
 		return { type, id: String(id), attributes };
 	});
 	return { data, meta, links };
-}
-
-function pickFields(obj: Record<string, unknown>, fields: string[]): Record<string, unknown> {
-	const result: Record<string, unknown> = {};
-	for (const field of fields) {
-		if (field in obj) result[field] = obj[field];
-	}
-	return result;
 }

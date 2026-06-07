@@ -7,7 +7,6 @@ import { CreateProductDto } from './dto';
 export interface CursorPaginationOptions {
 	size: number;
 	after?: number;
-	attributes?: string[];
 }
 
 export interface CursorPaginatedResult {
@@ -19,7 +18,6 @@ export interface CursorPaginatedResult {
 export interface OffsetPaginationOptions {
 	page: number;
 	limit: number;
-	attributes?: string[];
 }
 
 export interface OffsetPaginatedResult {
@@ -41,12 +39,12 @@ export class ProductsRepository {
 		return this.productModel.findOne({ where: { productToken: token } });
 	}
 
-	async findById(id: number, attributes?: string[]): Promise<Product | null> {
-		return this.productModel.findByPk(id, attributes ? { attributes } : undefined);
+	async findById(id: number): Promise<Product | null> {
+		return this.productModel.findByPk(id);
 	}
 
 	async findAll(options: CursorPaginationOptions): Promise<CursorPaginatedResult> {
-		const { size, after, attributes } = options;
+		const { size, after } = options;
 		const where: Record<string, unknown> = {};
 		if (after) {
 			where.id = { [Op.gt]: after };
@@ -54,8 +52,7 @@ export class ProductsRepository {
 		const rows = await this.productModel.findAll({
 			where,
 			order: [['id', 'ASC']],
-			limit: size + 1,
-			...(attributes ? { attributes } : {})
+			limit: size + 1
 		});
 		const hasNext = rows.length > size;
 		const data = hasNext ? rows.slice(0, size) : rows;
@@ -64,13 +61,12 @@ export class ProductsRepository {
 	}
 
 	async findAllOffset(options: OffsetPaginationOptions): Promise<OffsetPaginatedResult> {
-		const { page, limit, attributes } = options;
+		const { page, limit } = options;
 		const offset = (page - 1) * limit;
 		const { rows: data, count: total } = await this.productModel.findAndCountAll({
 			offset,
 			limit,
-			order: [['id', 'ASC']],
-			...(attributes ? { attributes } : {})
+			order: [['id', 'ASC']]
 		});
 		return { data, total, page, limit };
 	}
