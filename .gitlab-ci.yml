@@ -43,9 +43,7 @@ build:
     - cp -r node_modules node_modules_backup
     - npm run build
     - npm prune --omit=dev
-    - node -e "require('./dist/app.module')"
-    - rm -rf node_modules
-    - mv node_modules_backup node_modules
+    - node -e 'require("./dist/app.module")'
     - rm -rf node_modules
     - mv node_modules_backup node_modules
   artifacts:
