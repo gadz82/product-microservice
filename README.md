@@ -24,7 +24,10 @@ npm run setup
 # 3. Copy environment configuration
 cp .env.example .env
 
-# 4. Start the development environment (MySQL + hot-reload app)
+# 4. Install agent skills (optional — enables AI coding assistants to understand the project)
+npx skills experimental_install
+
+# 5. Start the development environment (MySQL + hot-reload app)
 npm run quickstart
 ```
 
@@ -446,6 +449,31 @@ npx skills update
 ```
 
 **Why commit `skills-lock.json`?** Same reason you commit `package-lock.json` — it ensures all contributors and CI environments use the same skill versions. The `computedHash` lets the CLI detect drift.
+
+### Custom Skill: product-nest-onboarding
+
+This project ships a custom local skill at `.skills/product-nest-onboarding/SKILL.md`. It's an opinionated onboarding agent designed for developers (and their AI assistants) joining the project. Rather than a dry reference manual, it reads like the notes you'd scribble after your first week — the tribal knowledge you'd normally have to pester a senior dev for.
+
+**What it covers:**
+
+- Architecture decisions and *why* they were made (CQS lite, repository pattern, serializer layer, Zod validation, `stopAtFirstError`)
+- Every way to run the app (quickstart, manual, Docker, Makefile)
+- JSON:API response internals — how domain objects become wire format, where `productToken` lives and why
+- Dual pagination (offset vs cursor) with concrete examples
+- Error handling philosophy — dev gets detail, prod gets nothing
+- Testing strategies (unit conventions, integration with Newman, smoke tests)
+- Code style rules with zero-tolerance enforcement explained
+- Commit conventions and CI/CD pipeline stages
+- Database migration workflow and Docker compose strategies
+- Common "why?" questions that save you from reading the spec docs
+
+The skill is registered in `skills-lock.json` with `sourceType: "local"` and will be installed by `npx skills experimental_install` alongside any remote skills.
+
+```
+.skills/
+└── product-nest-onboarding/
+    └── SKILL.md        # The onboarding knowledge base
+```
 
 ## Troubleshooting
 

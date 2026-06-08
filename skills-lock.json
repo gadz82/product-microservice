@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "SKILL.md",
       "computedHash": "1b6f82e889d19d305e38e35594de08eca0242321f353cafa4cf5e61dd3aa1a73"
+    },
+    "product-nest-onboarding": {
+      "source": ".skills/product-nest-onboarding",
+      "sourceType": "local",
+      "skillPath": "SKILL.md",
+      "computedHash": "c5e9a03aad563351d6975b0b2c38ab62671e788bd9621db7e36c4186ece96512"
     }
   }
 }
