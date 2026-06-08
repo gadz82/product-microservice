@@ -40,10 +40,14 @@ build:
   image: node:22-alpine
   needs: [install]
   script:
+    - cp -r node_modules node_modules_backup
     - npm run build
     - npm prune --omit=dev
+    - node dist/main.js &
     - sleep 3
     - kill %1 || true
+    - rm -rf node_modules
+    - mv node_modules_backup node_modules
   artifacts:
     paths:
       - dist/
@@ -68,8 +72,6 @@ integration-test:
   services:
     - name: mysql:8.0
       alias: mysql
-    - name: redis:7-alpine
-      alias: redis
   script:
     - npm run db:migrate
     - npm run start &

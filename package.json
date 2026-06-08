@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"setup": "npm ci && npx husky",
-		"run-dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
+		"quickstart": "npm run setup && docker compose -f docker-compose.dev.yml up -d && sleep 10 && npm run db:migrate && npm run start:dev",
 		"start:dev": "nest start --watch",
 		"db:migrate": "npx sequelize-cli db:migrate --config database/config/config.js --migrations-path database/migrations",
 		"db:migrate:undo": "npx sequelize-cli db:migrate:undo --config database/config/config.js --migrations-path database/migrations",

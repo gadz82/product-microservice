@@ -7,7 +7,8 @@ export = {
 		database: process.env.DB_NAME,
 		host: process.env.DB_HOST,
 		port: Number(process.env.DB_PORT),
-		dialect: 'mysql'
+		dialect: 'mysql',
+		logging: process.env.DB_LOGGING === 'true' ? console.log : false
 	},
 	test: {
 		username: process.env.DB_USER,
@@ -15,7 +16,8 @@ export = {
 		database: process.env.DB_NAME,
 		host: process.env.DB_HOST,
 		port: Number(process.env.DB_PORT),
-		dialect: 'mysql'
+		dialect: 'mysql',
+		logging: process.env.DB_LOGGING === 'true' ? console.log : false
 	},
 	production: {
 		username: process.env.DB_USER,
@@ -23,6 +25,7 @@ export = {
 		database: process.env.DB_NAME,
 		host: process.env.DB_HOST,
 		port: Number(process.env.DB_PORT),
-		dialect: 'mysql'
+		dialect: 'mysql',
+		logging: process.env.DB_LOGGING === 'true' ? console.log : false
 	}
 };

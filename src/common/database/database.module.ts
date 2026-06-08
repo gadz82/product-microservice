@@ -13,7 +13,8 @@ import { ConfigService } from '@nestjs/config';
 				password: configService.get<string>('database.password'),
 				database: configService.get<string>('database.name'),
 				autoLoadModels: true,
-				synchronize: false
+				synchronize: false,
+				logging: configService.get<string>('database.logging') === 'true' ? console.log : false
 			}),
 			inject: [ConfigService]
 		})

@@ -3,9 +3,12 @@ import { ProductsRepository } from '../repositories/products.repository';
 import { CreateProductDto, UpdateStockDto } from '../dto';
 import { Product } from '../models/product.model';
 import { ProductReadService } from './product-read.service';
+import { LoggerService } from '../../common/logger';
 
 @Injectable()
 export class ProductWriteService {
+	private readonly logger = new LoggerService();
+
 	constructor(
 		private readonly productsRepository: ProductsRepository,
 		private readonly productReadService: ProductReadService
@@ -16,12 +19,16 @@ export class ProductWriteService {
 		if (existing) {
 			throw new ConflictException(`Product with token "${dto.productToken}" already exists`);
 		}
-		return await this.productsRepository.create(dto);
+		const product = await this.productsRepository.create(dto);
+		this.logger.log(`Product created: ${product.productToken}`, 'ProductWriteService');
+		return product;
 	}
 
 	async updateStock(token: string, dto: UpdateStockDto): Promise<Product> {
 		const product = await this.productReadService.findOneByToken(token);
-		return await this.productsRepository.updateStock(product, dto.stock);
+		const updated = await this.productsRepository.updateStock(product, dto.stock);
+		this.logger.log(`Product stock updated: ${token} -> ${dto.stock}`, 'ProductWriteService');
+		return updated;
 	}
 
 	async remove(token: string): Promise<void> {
