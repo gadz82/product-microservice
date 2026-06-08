@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { LoggerService as NestLoggerService } from '@nestjs/common';
 
 type LogLevel = 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR' | 'SILENT';
@@ -11,13 +12,15 @@ const LEVEL_PRIORITY: Record<LogLevel, number> = {
 	SILENT: 4
 };
 
+const VALID_LEVELS = Object.keys(LEVEL_PRIORITY) as LogLevel[];
+
 @Injectable()
 export class LoggerService implements NestLoggerService {
 	private readonly level: LogLevel;
 
-	constructor() {
-		const raw = (process.env.LOGGER_LEVEL ?? 'DEBUG').toUpperCase();
-		this.level = (raw in LEVEL_PRIORITY ? raw : 'DEBUG') as LogLevel;
+	constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
+		const raw = (this.configService.get<string>('loggerLevel') ?? 'DEBUG').toUpperCase();
+		this.level = (VALID_LEVELS.includes(raw as LogLevel) ? raw : 'DEBUG') as LogLevel;
 	}
 
 	private shouldLog(target: LogLevel): boolean {

@@ -1,12 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { LoggerService } from './logger.service';
 
 describe('LoggerService', () => {
 	let service: LoggerService;
 
-	const buildService = async (): Promise<LoggerService> => {
+	const buildService = async (loggerLevel = 'DEBUG'): Promise<LoggerService> => {
 		const module: TestingModule = await Test.createTestingModule({
-			providers: [LoggerService]
+			providers: [
+				LoggerService,
+				{ provide: ConfigService, useValue: { get: (key: string) => (key === 'loggerLevel' ? loggerLevel : undefined) } }
+			]
 		}).compile();
 		return module.get<LoggerService>(LoggerService);
 	};
@@ -20,13 +24,11 @@ describe('LoggerService', () => {
 
 	afterEach(() => {
 		jest.restoreAllMocks();
-		delete process.env.LOGGER_LEVEL;
 	});
 
 	describe('debug level', () => {
 		beforeEach(async () => {
-			process.env.LOGGER_LEVEL = 'DEBUG';
-			service = await buildService();
+			service = await buildService('DEBUG');
 		});
 
 		it('should log debug messages', () => {
@@ -62,8 +64,7 @@ describe('LoggerService', () => {
 
 	describe('info level', () => {
 		beforeEach(async () => {
-			process.env.LOGGER_LEVEL = 'INFO';
-			service = await buildService();
+			service = await buildService('INFO');
 		});
 
 		it('should not log debug messages', () => {
@@ -79,8 +80,7 @@ describe('LoggerService', () => {
 
 	describe('warning level', () => {
 		beforeEach(async () => {
-			process.env.LOGGER_LEVEL = 'WARNING';
-			service = await buildService();
+			service = await buildService('WARNING');
 		});
 
 		it('should not log info messages', () => {
@@ -101,8 +101,7 @@ describe('LoggerService', () => {
 
 	describe('error level', () => {
 		beforeEach(async () => {
-			process.env.LOGGER_LEVEL = 'ERROR';
-			service = await buildService();
+			service = await buildService('ERROR');
 		});
 
 		it('should not log warn messages', () => {
@@ -118,8 +117,7 @@ describe('LoggerService', () => {
 
 	describe('silent level', () => {
 		beforeEach(async () => {
-			process.env.LOGGER_LEVEL = 'SILENT';
-			service = await buildService();
+			service = await buildService('SILENT');
 		});
 
 		it('should not log any messages', () => {
@@ -138,8 +136,7 @@ describe('LoggerService', () => {
 
 	describe('context parameter', () => {
 		beforeEach(async () => {
-			process.env.LOGGER_LEVEL = 'DEBUG';
-			service = await buildService();
+			service = await buildService('DEBUG');
 		});
 
 		it('should include context in log output', () => {
@@ -150,8 +147,7 @@ describe('LoggerService', () => {
 
 	describe('invalid LOGGER_LEVEL', () => {
 		beforeEach(async () => {
-			process.env.LOGGER_LEVEL = 'INVALID';
-			service = await buildService();
+			service = await buildService('INVALID');
 		});
 
 		it('should default to DEBUG and log all messages', () => {
@@ -162,11 +158,10 @@ describe('LoggerService', () => {
 
 	describe('missing LOGGER_LEVEL', () => {
 		beforeEach(async () => {
-			delete process.env.LOGGER_LEVEL;
-			service = await buildService();
+			service = await buildService(undefined);
 		});
 
-		it('should default to DEBUG when env var is not set', () => {
+		it('should default to DEBUG when config value is undefined', () => {
 			service.debug('msg');
 			expect(console.debug).toHaveBeenCalled();
 		});

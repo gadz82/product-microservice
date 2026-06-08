@@ -16,5 +16,22 @@ describe('EnvValidation', () => {
 			const result = validate(config);
 			expect(result.PORT).toBe(4000);
 		});
+
+		it('should accept valid LOGGER_LEVEL values', () => {
+			const config = { DB_HOST: 'localhost', DB_NAME: 'db', DB_USER: 'u', DB_PASSWORD: 'p', LOGGER_LEVEL: 'WARNING' };
+			const result = validate(config);
+			expect(result.LOGGER_LEVEL).toBe('WARNING');
+		});
+
+		it('should default LOGGER_LEVEL to DEBUG when omitted', () => {
+			const config = { DB_HOST: 'localhost', DB_NAME: 'db', DB_USER: 'u', DB_PASSWORD: 'p' };
+			const result = validate(config);
+			expect(result.LOGGER_LEVEL).toBe('DEBUG');
+		});
+
+		it('should reject invalid LOGGER_LEVEL', () => {
+			const config = { DB_HOST: 'localhost', DB_NAME: 'db', DB_USER: 'u', DB_PASSWORD: 'p', LOGGER_LEVEL: 'INVALID' };
+			expect(() => validate(config)).toThrow('Environment validation failed');
+		});
 	});
 });

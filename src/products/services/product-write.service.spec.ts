@@ -3,6 +3,7 @@ import { ConflictException } from '@nestjs/common';
 import { ProductWriteService } from './product-write.service';
 import { ProductReadService } from './product-read.service';
 import { ProductsRepository } from '../repositories/products.repository';
+import { LoggerService } from '../../common/logger';
 
 describe('ProductWriteService', () => {
 	let service: ProductWriteService;
@@ -20,12 +21,22 @@ describe('ProductWriteService', () => {
 		findOneByToken: jest.fn()
 	};
 
+	const mockLogger = {
+		log: jest.fn(),
+		debug: jest.fn(),
+		verbose: jest.fn(),
+		warn: jest.fn(),
+		error: jest.fn(),
+		fatal: jest.fn()
+	};
+
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				ProductWriteService,
 				{ provide: ProductReadService, useValue: mockReadService },
-				{ provide: ProductsRepository, useValue: mockRepository }
+				{ provide: ProductsRepository, useValue: mockRepository },
+				{ provide: LoggerService, useValue: mockLogger }
 			]
 		}).compile();
 

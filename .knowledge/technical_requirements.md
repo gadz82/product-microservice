@@ -120,12 +120,16 @@ Orchestrate local environment with:
 
 ### Package Scripts
 
-| Script                         | Purpose                                        |
-|--------------------------------|------------------------------------------------|
-| `npm run run-dev`              | Self-contained local dev environment (hot-reload) |
-| `npm run build`                | Compile TypeScript to deployable JS            |
-| `npm run run-unit-test`        | Execute unit test suite (Jest)                 |
-| `npm run run-integration-test` | Execute integration tests (Newman)             |
+| Script                              | Purpose                                        |
+|-------------------------------------|------------------------------------------------|
+| `npm run start:dev`                 | Start NestJS in watch mode (hot-reload)       |
+| `npm run quickstart`                | Self-contained local dev environment (setup + DB + migrate + dev) |
+| `npm run build`                     | Compile TypeScript to deployable JS            |
+| `npm run unit-test`                 | Execute unit test suite (Jest)                 |
+| `npm run integration-test`          | Execute Newman products CRUD collection        |
+| `npm run integration-test:pagination` | Execute Newman pagination collection         |
+| `npm run integration-test:errors`    | Execute Newman error handling collection       |
+| `npm run integration-test:all`       | Execute all Newman collections                 |
 
 ### Makefile
 

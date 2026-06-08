@@ -8,7 +8,8 @@ export const envSchema = z.object({
 	DB_NAME: z.string().min(1),
 	DB_USER: z.string().min(1),
 	DB_PASSWORD: z.string().min(1),
-	DB_LOGGING: z.enum(['true', 'false']).default('false')
+	DB_LOGGING: z.enum(['true', 'false']).default('false'),
+	LOGGER_LEVEL: z.enum(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'SILENT']).default('DEBUG')
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

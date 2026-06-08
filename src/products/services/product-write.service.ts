@@ -7,11 +7,10 @@ import { LoggerService } from '../../common/logger';
 
 @Injectable()
 export class ProductWriteService {
-	private readonly logger = new LoggerService();
-
 	constructor(
 		private readonly productsRepository: ProductsRepository,
-		private readonly productReadService: ProductReadService
+		private readonly productReadService: ProductReadService,
+		private readonly logger: LoggerService
 	) {}
 
 	async create(dto: CreateProductDto): Promise<Product> {

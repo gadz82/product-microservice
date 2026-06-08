@@ -1,6 +1,7 @@
 export default (): object => ({
 	nodeEnv: process.env.NODE_ENV ?? 'development',
 	port: Number(process.env.PORT ?? 3000),
+	loggerLevel: process.env.LOGGER_LEVEL ?? 'DEBUG',
 	database: {
 		host: process.env.DB_HOST,
 		port: Number(process.env.DB_PORT ?? 3306),

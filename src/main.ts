@@ -24,7 +24,7 @@ async function bootstrap(): Promise<void> {
 			disableErrorMessages: isProd
 		})
 	);
-	const logger = new LoggerService();
+	const logger = app.get(LoggerService);
 	app.useGlobalFilters(new DatabaseExceptionFilter(logger), new HttpExceptionFilter(logger, configService));
 
 	const config = new DocumentBuilder()
