@@ -30,6 +30,8 @@ npm run quickstart
 
 The API will be available at `http://localhost:3000`.
 
+Swagger UI is available at `http://localhost:3000/api/docs`.
+
 ## Environment Setup
 
 ### Environment Variables
@@ -47,7 +49,7 @@ Copy `.env.example` to `.env` and adjust values as needed:
 | `DB_USER`         | `appuser`     | Database user                  |
 | `DB_PASSWORD`     | `apppassword` | Database password              |
 | `DB_ROOT_PASSWORD`| `rootpassword`| MySQL root password            |
-| `LOGGER_LEVEL`    | `INFO`        | Log level (SILENT, ERROR, INFO, DEBUG) |
+| `LOGGER_LEVEL`    | `DEBUG`       | Log level (DEBUG, INFO, WARNING, ERROR, SILENT) |
 
 ### Database Migrations
 
@@ -76,7 +78,7 @@ npm run db:migration:generate <migration-name>
 Runs the app with file watching. Requires MySQL to be running (handled by the compose stack):
 
 ```bash
-npm run run-dev
+npm run start:dev
 ```
 
 This starts MySQL via `docker-compose.dev.yml` and runs NestJS in watch mode.
@@ -124,13 +126,13 @@ For convenience, a `Makefile` provides shortcuts for common operations:
 
 ## API Endpoints
 
-| Method   | Endpoint                        | Description                          |
-|----------|---------------------------------|--------------------------------------|
-| `POST`   | `/products`                     | Create a new product                 |
-| `GET`    | `/products`                     | List products (paginated)            |
-| `GET`    | `/products/:productToken`       | Get a specific product               |
-| `PATCH`  | `/products/:productToken`       | Update product (stock)               |
-| `DELETE` | `/products/:productToken`       | Remove a product                     |
+| Method   | Endpoint                             | Description                          |
+|----------|--------------------------------------|--------------------------------------|
+| `POST`   | `/v1/products`                      | Create a new product                 |
+| `GET`    | `/v1/products`                      | List products (paginated)            |
+| `GET`    | `/v1/products/:productToken`         | Get a specific product               |
+| `PATCH`  | `/v1/products/:productToken`         | Update product (stock)               |
+| `DELETE` | `/v1/products/:productToken`         | Remove a product                     |
 
 ### Request Body (Create)
 
@@ -148,13 +150,15 @@ For convenience, a `Makefile` provides shortcuts for common operations:
 ```json
 {
   "data": {
-    "type": "product",
+    "type": "products",
     "id": "unique-token-123",
     "attributes": {
       "productToken": "unique-token-123",
       "name": "Product Name",
       "price": 29.99,
-      "stock": 100
+      "stock": 100,
+      "createdAt": "2026-06-07T16:27:00.000Z",
+      "updatedAt": "2026-06-07T16:27:00.000Z"
     }
   }
 }
@@ -162,15 +166,29 @@ For convenience, a `Makefile` provides shortcuts for common operations:
 
 ### Pagination
 
-The list endpoint supports multiple pagination styles:
+The list endpoint supports dual pagination via the `pt` (pagination type) parameter:
 
-| Parameter      | Description                    |
-|----------------|--------------------------------|
-| `page`         | Page number (1-based)          |
-| `limit`        | Items per page                 |
-| `pt`           | Product token filter           |
-| `page[size]`   | Cursor pagination size         |
-| `page[after]`  | Cursor pagination offset token |
+| Parameter      | Description                                      |
+|----------------|--------------------------------------------------|
+| `pt`           | Pagination type: `offset` (default) or `cursor`  |
+| `page`         | Page number, 1-based (offset pagination only)    |
+| `limit`        | Items per page (offset pagination only)          |
+| `page[size]`   | Page size (cursor pagination only)                |
+| `page[after]`  | Cursor token for next page (cursor pagination)    |
+
+**Offset pagination** (default):
+
+```
+GET /v1/products?page=1&limit=10
+GET /v1/products?pt=offset&page=2&limit=10
+```
+
+**Cursor pagination**:
+
+```
+GET /v1/products?pt=cursor&page[size]=10
+GET /v1/products?pt=cursor&page[size]=10&page[after]=MQ==
+```
 
 ## Testing
 
@@ -268,15 +286,25 @@ product-nest/
 ├── src/                          # Application source code
 │   ├── main.ts                   # Entry point
 │   ├── app.module.ts             # Root module
+│   ├── common/                   # Shared infrastructure
+│   │   ├── config/               # Env validation (Zod) + configuration
+│   │   ├── database/             # Sequelize module
+│   │   ├── filters/              # Global exception filters
+│   │   ├── logger/               # Custom logger service
+│   │   ├── pagination/           # Pagination pipes, constants, cursor utils
+│   │   └── serializer/           # JSON:API serializer
 │   ├── products/                 # Products module
-│   │   ├── products.controller.ts
-│   │   ├── products.service.ts
-│   │   ├── products.module.ts
-│   │   ├── dto/                  # Data transfer objects
-│   │   └── product.model.ts      # Sequelize model
+│   │   ├── controllers/          # REST endpoints
+│   │   ├── services/             # Read/Write service (CQS split)
+│   │   ├── repositories/         # Data access layer
+│   │   ├── serializers/          # JSON:API product serializer
+│   │   ├── dto/                  # Request/response DTOs
+│   │   ├── models/               # Sequelize model
+│   │   ├── interfaces/          # Paginated result types
+│   │   └── products.module.ts
 │   └── export-swagger.ts         # Swagger export script
 ├── database/
-│   ├── config/config.js          # Sequelize configuration
+│   ├── config/config.js          # Sequelize CLI configuration
 │   └── migrations/               # Database migrations
 ├── tests/
 │   └── integration/              # Newman integration test collections
@@ -288,6 +316,24 @@ product-nest/
 ├── .gitlab-ci.yml                # GitLab CI pipeline
 └── .github/workflows/ci.yml      # GitHub Actions pipeline
 ```
+
+## SOLID Principles
+
+The architecture follows SOLID principles to ensure maintainability and separation of concerns:
+
+**Single Responsibility** — Each class has one job. `ProductReadService` handles queries, `ProductWriteService` handles mutations. `ProductsRepository` encapsulates data access, `ProductsSerializer` encapsulates response formatting, `ProductsController` orchestrates HTTP concerns only.
+
+**Open/Closed** — Pagination supports both offset and cursor strategies through the `pt` pipe and shared repository interface without modifying the controller. New pagination types can be added by extending `PAGINATION_TYPES`. Exception filters are separate classes that can be extended without touching existing ones.
+
+**Liskov Substitution** — All services implement `@Injectable()` and are consumed through their concrete types via NestJS DI. The `LoggerService` implements the NestJS `LoggerService` interface, making it swappable with any NestJS-compatible logger.
+
+**Interface Segregation** — DTOs are split by use case: `CreateProductDto` for creation, `UpdateStockDto` for partial updates. The `PaginatedProducts` interface carries only the fields each pagination mode needs. The `JsonApiSerializer` exposes focused methods (`serializeOne`, `serializeMany`) rather than a single generic method.
+
+**Dependency Inversion** — High-level modules depend on abstractions, not implementations. The controller depends on `ProductReadService` and `ProductWriteService`, not the repository directly. `ProductWriteService` uses `ProductReadService.findOneByToken` for existence checks instead of direct DB queries. All dependencies are injected through NestJS DI, making testing straightforward with mocks.
+
+### CQS Lite
+
+The product domain splits read and write paths into separate services (`ProductReadService` / `ProductWriteService`) following Command-Query Separation. This keeps query logic (pagination, filtering) separate from mutation logic (create, update, delete) and prevents write-side concerns from leaking into read paths.
 
 ## Database Schema
 
@@ -308,7 +354,9 @@ Table: `products`
 
 ## Swagger / OpenAPI
 
-Export the API documentation:
+The API documentation is available interactively at `http://localhost:3000/api/docs` when the service is running.
+
+Export the OpenAPI specification to a JSON file:
 
 ```bash
 make swagger
