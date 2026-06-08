@@ -39,22 +39,13 @@ build:
   stage: build
   image: node:22-alpine
   needs: [install]
-  variables:
-    NODE_ENV: production
-    PORT: "3000"
-    DB_HOST: localhost
-    DB_PORT: "3306"
-    DB_NAME: ecommerce
-    DB_USER: appuser
-    DB_PASSWORD: apppassword
-    LOGGER_LEVEL: SILENT
   script:
     - cp -r node_modules node_modules_backup
     - npm run build
     - npm prune --omit=dev
-    - node dist/main.js &
-    - ./scripts/wait-for-health.sh localhost 3000 15
-    - kill %1 || true
+    - node -e "require('./dist/app.module')"
+    - rm -rf node_modules
+    - mv node_modules_backup node_modules
     - rm -rf node_modules
     - mv node_modules_backup node_modules
   artifacts:

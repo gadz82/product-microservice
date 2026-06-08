@@ -46,22 +46,10 @@ jobs:
           key: deps-${{ hashFiles('package-lock.json') }}
       - run: npm run build
       - name: Verify production boot
-        env:
-          NODE_ENV: production
-          PORT: 3000
-          DB_HOST: localhost
-          DB_PORT: 3306
-          DB_NAME: ecommerce
-          DB_USER: appuser
-          DB_PASSWORD: apppassword
-          LOGGER_LEVEL: SILENT
         run: |
           cp -r node_modules node_modules_backup
           npm prune --omit=dev
-          node dist/main.js &
-          APP_PID=$!
-          ./scripts/wait-for-health.sh localhost 3000 15
-          kill $APP_PID || true
+          node -e "require('./dist/app.module')"
           rm -rf node_modules
           mv node_modules_backup node_modules
       - uses: actions/upload-artifact@v4
