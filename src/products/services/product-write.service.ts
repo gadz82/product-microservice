@@ -1,15 +1,13 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ProductsRepository } from '../repositories/products.repository';
 import { CreateProductDto, UpdateStockDto } from '../dto';
 import { Product } from '../models/product.model';
-import { ProductReadService } from './product-read.service';
 import { LoggerService } from '../../common/logger';
 
 @Injectable()
 export class ProductWriteService {
 	constructor(
 		private readonly productsRepository: ProductsRepository,
-		private readonly productReadService: ProductReadService,
 		private readonly logger: LoggerService
 	) {}
 
@@ -24,14 +22,20 @@ export class ProductWriteService {
 	}
 
 	async updateStock(token: string, dto: UpdateStockDto): Promise<Product> {
-		const product = await this.productReadService.findOneByToken(token);
+		const product = await this.productsRepository.findByToken(token);
+		if (!product) {
+			throw new NotFoundException(`Product with token "${token}" not found`);
+		}
 		const updated = await this.productsRepository.updateStock(product, dto.stock);
 		this.logger.log(`Product stock updated: ${token} -> ${dto.stock}`, 'ProductWriteService');
 		return updated;
 	}
 
 	async remove(token: string): Promise<void> {
-		const product = await this.productReadService.findOneByToken(token);
+		const product = await this.productsRepository.findByToken(token);
+		if (!product) {
+			throw new NotFoundException(`Product with token "${token}" not found`);
+		}
 		await this.productsRepository.remove(product);
 	}
 }

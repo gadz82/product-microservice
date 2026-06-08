@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ProductWriteService } from './product-write.service';
-import { ProductReadService } from './product-read.service';
 import { ProductsRepository } from '../repositories/products.repository';
 import { LoggerService } from '../../common/logger';
 
@@ -17,10 +16,6 @@ describe('ProductWriteService', () => {
 		remove: jest.fn()
 	};
 
-	const mockReadService = {
-		findOneByToken: jest.fn()
-	};
-
 	const mockLogger = {
 		log: jest.fn(),
 		debug: jest.fn(),
@@ -34,7 +29,6 @@ describe('ProductWriteService', () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				ProductWriteService,
-				{ provide: ProductReadService, useValue: mockReadService },
 				{ provide: ProductsRepository, useValue: mockRepository },
 				{ provide: LoggerService, useValue: mockLogger }
 			]
@@ -66,15 +60,21 @@ describe('ProductWriteService', () => {
 	});
 
 	describe('updateStock', () => {
-		it('should delegate to repository updateStock', async () => {
-			mockReadService.findOneByToken.mockResolvedValue(mockProduct);
+		it('should update stock when product exists', async () => {
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
 			mockRepository.updateStock.mockResolvedValue({ ...mockProduct, stock: 50 });
 			const result = await service.updateStock('tok-1', { stock: 50 });
 			expect(result.stock).toBe(50);
+			expect(mockRepository.updateStock).toHaveBeenCalledWith(mockProduct, 50);
+		});
+
+		it('should throw NotFoundException when product does not exist', async () => {
+			mockRepository.findByToken.mockResolvedValue(null);
+			await expect(service.updateStock('missing', { stock: 50 })).rejects.toThrow(NotFoundException);
 		});
 
 		it('should propagate repository error when updateStock fails', async () => {
-			mockReadService.findOneByToken.mockResolvedValue(mockProduct);
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
 			const dbError = new Error('DB error');
 			mockRepository.updateStock.mockRejectedValue(dbError);
 			await expect(service.updateStock('tok-1', { stock: 50 })).rejects.toThrow(dbError);
@@ -82,15 +82,20 @@ describe('ProductWriteService', () => {
 	});
 
 	describe('remove', () => {
-		it('should delegate to repository remove', async () => {
-			mockReadService.findOneByToken.mockResolvedValue(mockProduct);
+		it('should remove product when it exists', async () => {
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
 			mockRepository.remove.mockResolvedValue(undefined);
 			await service.remove('tok-1');
 			expect(mockRepository.remove).toHaveBeenCalledWith(mockProduct);
 		});
 
+		it('should throw NotFoundException when product does not exist', async () => {
+			mockRepository.findByToken.mockResolvedValue(null);
+			await expect(service.remove('missing')).rejects.toThrow(NotFoundException);
+		});
+
 		it('should propagate repository error when remove fails', async () => {
-			mockReadService.findOneByToken.mockResolvedValue(mockProduct);
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
 			const dbError = new Error('DB error');
 			mockRepository.remove.mockRejectedValue(dbError);
 			await expect(service.remove('tok-1')).rejects.toThrow(dbError);

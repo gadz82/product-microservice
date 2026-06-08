@@ -21,7 +21,6 @@ unit-test: install
 	npm run unit-test
 
 integration-test: smoke-test
-	@sleep 3
 	npm run integration-test
 	npm run integration-test:errors
 
@@ -33,8 +32,8 @@ smoke-test: install build unit-test
 	@echo "Waiting for services to be healthy..."
 	@docker compose exec mysql mysqladmin ping -h localhost --silent || sleep 5
 	npm run db:migrate
-	@sleep 5
-	@curl -sf http://localhost:3000/products?page=1&limit=1 > /dev/null && echo "Smoke test passed" || echo "Smoke test failed"
+	./scripts/wait-for-health.sh localhost 3000 30
+	@curl -sf http://localhost:3000/v1/products > /dev/null && echo "Smoke test passed" || echo "Smoke test failed"
 
 full-test: down install build unit-test smoke-test
 	npm run integration-test:all
@@ -47,6 +46,7 @@ clean: down
 
 dev:
 	docker compose -f docker-compose.dev.yml up -d
+	@echo "Waiting for MySQL..."
 	@sleep 5
 	npm run build
 	npm run db:migrate

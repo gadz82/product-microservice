@@ -44,7 +44,7 @@ build:
     - npm run build
     - npm prune --omit=dev
     - node dist/main.js &
-    - sleep 3
+    - ./scripts/wait-for-health.sh localhost 3000 15
     - kill %1 || true
     - rm -rf node_modules
     - mv node_modules_backup node_modules
@@ -75,7 +75,7 @@ integration-test:
   script:
     - npm run db:migrate
     - npm run start &
-    - sleep 5
+    - LOGGER_LEVEL=SILENT ./scripts/wait-for-health.sh localhost 3000 30
     - npm run integration-test:all
 
 sast:
