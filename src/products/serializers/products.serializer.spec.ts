@@ -42,7 +42,7 @@ describe('ProductsSerializer', () => {
 			expect(result.data.attributes).toHaveProperty('createdAt');
 			expect(result.data.attributes).toHaveProperty('updatedAt');
 			expect(result.data.attributes).not.toHaveProperty('id');
-			expect(result.data.attributes).not.toHaveProperty('productToken');
+			expect(result.data.attributes).toHaveProperty('productToken', 'tok-1');
 		});
 
 		it('should serialize correctly even when timestamps are strings', () => {

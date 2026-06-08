@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { HttpExceptionFilter } from './http-exception.filter';
 import { LoggerService } from '../logger';
+import { ConfigService } from '@nestjs/config';
 
 describe('HttpExceptionFilter', () => {
 	let filter: HttpExceptionFilter;
@@ -8,6 +9,7 @@ describe('HttpExceptionFilter', () => {
 	let mockRequest: { method: string; url: string };
 	let mockHost: { switchToHttp: jest.Mock };
 	let mockLogger: jest.Mocked<LoggerService>;
+	let mockConfigService: { get: jest.Mock };
 
 	beforeEach(() => {
 		mockLogger = {
@@ -18,7 +20,8 @@ describe('HttpExceptionFilter', () => {
 			error: jest.fn(),
 			fatal: jest.fn()
 		} as unknown as jest.Mocked<LoggerService>;
-		filter = new HttpExceptionFilter(mockLogger);
+		mockConfigService = { get: jest.fn().mockReturnValue('development') };
+		filter = new HttpExceptionFilter(mockLogger, mockConfigService as unknown as ConfigService);
 		mockResponse = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 		mockRequest = { method: 'GET', url: '/v1/products' };
 		mockHost = {
@@ -60,5 +63,13 @@ describe('HttpExceptionFilter', () => {
 		filter.catch(exception, mockHost as never);
 		const body = mockResponse.json.mock.calls[0][0];
 		expect(body.error).toBe('Error');
+	});
+
+	it('should return generic message in production', () => {
+		mockConfigService.get.mockReturnValue('production');
+		const exception = new HttpException({ message: ['field is required'], error: 'Bad Request' }, HttpStatus.BAD_REQUEST);
+		filter.catch(exception, mockHost as never);
+		const body = mockResponse.json.mock.calls[0][0];
+		expect(body.message).toBe('BAD_REQUEST');
 	});
 });

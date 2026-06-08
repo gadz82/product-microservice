@@ -8,13 +8,24 @@ import { LoggerService } from './common/logger';
 
 async function bootstrap(): Promise<void> {
 	const app = await NestFactory.create(AppModule);
+	const configService = app.get(ConfigService);
+	const isProd = configService.get<string>('nodeEnv') === 'production';
+
 	app.enableVersioning({
 		type: VersioningType.URI,
 		defaultVersion: '1'
 	});
-	app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+	app.useGlobalPipes(
+		new ValidationPipe({
+			whitelist: true,
+			forbidNonWhitelisted: true,
+			transform: true,
+			stopAtFirstError: true,
+			disableErrorMessages: isProd
+		})
+	);
 	const logger = new LoggerService();
-	app.useGlobalFilters(new DatabaseExceptionFilter(logger), new HttpExceptionFilter(logger));
+	app.useGlobalFilters(new DatabaseExceptionFilter(logger), new HttpExceptionFilter(logger, configService));
 
 	const config = new DocumentBuilder()
 		.setTitle('Products Service')
@@ -25,7 +36,6 @@ async function bootstrap(): Promise<void> {
 	const document = SwaggerModule.createDocument(app, config);
 	SwaggerModule.setup('api/docs', app, document);
 
-	const configService = app.get(ConfigService);
 	const port = configService.get<number>('port', 3000);
 	await app.listen(port);
 }

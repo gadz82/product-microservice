@@ -67,7 +67,7 @@ export class ProductsController {
 		return this.serializer.one(product);
 	}
 
-	@Patch(':productToken/stock')
+	@Patch(':productToken')
 	@ApiOperation({ summary: 'Update product stock' })
 	@ApiParam({ name: 'productToken', description: 'Unique token identifying the product' })
 	@ApiBody({ type: UpdateStockDto })

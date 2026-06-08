@@ -1,10 +1,14 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { LoggerService } from '../logger';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-	constructor(@Inject(LoggerService) private readonly logger: LoggerService) {}
+	constructor(
+		@Inject(LoggerService) private readonly logger: LoggerService,
+		private readonly configService: ConfigService
+	) {}
 
 	catch(exception: HttpException, host: ArgumentsHost): void {
 		const ctx = host.switchToHttp();
@@ -20,10 +24,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
 		this.logger.warn(`HTTP ${status} — ${request.method} ${request.url}: ${JSON.stringify(message)}`);
 
+		const isProd = this.configService.get<string>('nodeEnv') === 'production';
+
 		response.status(status).json({
 			statusCode: status,
 			error: HttpStatus[status] ?? 'Error',
-			message,
+			message: isProd ? HttpStatus[status] : message,
 			path: request.url,
 			timestamp: new Date().toISOString()
 		});
