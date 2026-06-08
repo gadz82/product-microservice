@@ -1,0 +1,8 @@
+const path = require('path');
+
+require('ts-node').register({ transpileOnly: true });
+
+module.exports = {
+	config: path.resolve('database', 'config', 'config.ts'),
+	'migrations-path': path.resolve('database', 'migrations'),
+};
