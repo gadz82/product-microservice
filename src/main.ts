@@ -18,7 +18,7 @@ async function bootstrap(): Promise<void> {
 
 	const config = new DocumentBuilder()
 		.setTitle('Products Service')
-		.setDescription('The products microservice API description')
+		.setDescription('The products microservice API')
 		.setVersion('1.0')
 		.addTag('products')
 		.build();

@@ -48,6 +48,16 @@ describe('LoggerService', () => {
 			service.error('msg');
 			expect(console.error).toHaveBeenCalledWith('[ERROR] msg');
 		});
+
+		it('should log verbose messages', () => {
+			service.verbose('msg');
+			expect(console.debug).toHaveBeenCalledWith('[VERBOSE] msg');
+		});
+
+		it('should log fatal messages', () => {
+			service.fatal('msg');
+			expect(console.error).toHaveBeenCalledWith('[FATAL] msg');
+		});
 	});
 
 	describe('info level', () => {
@@ -117,6 +127,8 @@ describe('LoggerService', () => {
 			service.log('msg');
 			service.warn('msg');
 			service.error('msg');
+			service.verbose('msg');
+			service.fatal('msg');
 			expect(console.debug).not.toHaveBeenCalled();
 			expect(console.log).not.toHaveBeenCalled();
 			expect(console.warn).not.toHaveBeenCalled();
@@ -143,6 +155,18 @@ describe('LoggerService', () => {
 		});
 
 		it('should default to DEBUG and log all messages', () => {
+			service.debug('msg');
+			expect(console.debug).toHaveBeenCalled();
+		});
+	});
+
+	describe('missing LOGGER_LEVEL', () => {
+		beforeEach(async () => {
+			delete process.env.LOGGER_LEVEL;
+			service = await buildService();
+		});
+
+		it('should default to DEBUG when env var is not set', () => {
 			service.debug('msg');
 			expect(console.debug).toHaveBeenCalled();
 		});

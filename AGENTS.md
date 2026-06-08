@@ -63,3 +63,6 @@ database/                      ← Sequelize migrations & configuration
 1. Read `.knowledge/AGENTS.md` for execution strategy
 2. Read `.knowledge/prompts/EXECUTION_MATRIX.md` to find next pending prompt
 3. Execute prompts in order — each is idempotent (check → implement if needed → validate → commit)
+
+## Test execution and validation
+Always use package.json script, e.g. to run Unit Tests use npm run unit-test

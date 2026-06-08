@@ -3,9 +3,11 @@ import { ProductsRepository } from '../repositories/products.repository';
 import { Product } from '../models/product.model';
 import { PaginationType, decodeCursor, PAGINATION_DEFAULTS } from '../../common/pagination';
 import { PaginatedProducts } from '../interfaces/paginated-products.interface';
+
 @Injectable()
 export class ProductReadService {
 	constructor(private readonly productsRepository: ProductsRepository) {}
+
 	async list(pt: PaginationType, page?: number, limit?: number, size?: number, after?: string): Promise<PaginatedProducts> {
 		let result: PaginatedProducts;
 		if (pt === PAGINATION_DEFAULTS.CURSOR_TYPE) {
@@ -35,6 +37,7 @@ export class ProductReadService {
 		}
 		return result;
 	}
+
 	async findOneByToken(token: string): Promise<Product> {
 		const product = await this.productsRepository.findByToken(token);
 		if (!product) {
