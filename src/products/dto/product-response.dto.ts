@@ -5,7 +5,8 @@ export class ProductResponseDto {
 	@Exclude()
 	id!: number;
 
-	@Exclude()
+	@ApiProperty({ example: 'apple-iphone-15-token' })
+	@Expose()
 	productToken!: string;
 
 	@ApiProperty({ example: 'Apple iPhone 15' })

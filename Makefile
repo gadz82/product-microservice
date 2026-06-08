@@ -45,8 +45,11 @@ logs:
 clean: down
 	rm -rf dist coverage node_modules
 
-dev: install
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d mysql
+dev:
+	docker compose -f docker-compose.dev.yml up -d
+	@sleep 5
+	npm run build
+	npm run db:migrate
 	npm run start:dev
 
 swagger: install build
