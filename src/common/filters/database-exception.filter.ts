@@ -1,10 +1,11 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Inject } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { BaseError, UniqueConstraintError, ValidationError, ForeignKeyConstraintError, ConnectionError } from 'sequelize';
+import { LoggerService } from '../logger';
 
 @Catch(BaseError)
 export class DatabaseExceptionFilter implements ExceptionFilter {
-	private readonly logger = new Logger(DatabaseExceptionFilter.name);
+	constructor(@Inject(LoggerService) private readonly logger: LoggerService) {}
 
 	catch(exception: BaseError, host: ArgumentsHost): void {
 		const ctx = host.switchToHttp();
@@ -13,7 +14,7 @@ export class DatabaseExceptionFilter implements ExceptionFilter {
 
 		const { status, message } = this.mapException(exception);
 
-		this.logger.error(`DB error on ${request.method} ${request.url}: ${exception.message}`);
+		this.logger.error(`DB error on ${request.method} ${request.url}: ${exception.message}`, DatabaseExceptionFilter.name);
 
 		response.status(status).json({
 			statusCode: status,
@@ -29,7 +30,7 @@ export class DatabaseExceptionFilter implements ExceptionFilter {
 			return { status: HttpStatus.CONFLICT, message: 'A record with the given unique field already exists' };
 		}
 		if (exception instanceof ValidationError) {
-			return { status: HttpStatus.UNPROCESSABLE_ENTITY, message: exception.errors.map(e => e.message).join(', ') };
+			return { status: HttpStatus.UNPROCESSABLE_ENTITY, message: exception.errors.map((e) => e.message).join(', ') };
 		}
 		if (exception instanceof ForeignKeyConstraintError) {
 			return { status: HttpStatus.UNPROCESSABLE_ENTITY, message: 'Referenced resource does not exist' };

@@ -21,18 +21,15 @@ describe('ProductReadService', () => {
 	};
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
-			providers: [
-				ProductReadService,
-				{ provide: ProductsRepository, useValue: mockRepository }
-			]
+			providers: [ProductReadService, { provide: ProductsRepository, useValue: mockRepository }]
 		}).compile();
 		service = module.get<ProductReadService>(ProductReadService);
 		jest.clearAllMocks();
 	});
 	describe('list', () => {
- 	it('should return offset-paginated results for pt=offset', async () => {
+		it('should return offset-paginated results for pt=offset', async () => {
 			mockRepository.findAllOffset.mockResolvedValue({ data: [mockProduct], total: 1, page: 1, limit: 10 });
-				const result = await service.list('offset', 1, 10);
+			const result = await service.list('offset', 1, 10);
 			expect(result.meta).toHaveProperty('total', 1);
 		});
 		it('should return cursor-paginated results for pt=cursor', async () => {

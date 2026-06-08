@@ -8,7 +8,7 @@ export class JsonApiResourceSwagger {
 	id!: string;
 
 	@ApiProperty({ type: 'object', additionalProperties: true })
-	attributes!: Record<string, any>;
+	attributes!: Record<string, unknown>;
 }
 
 export class JsonApiSingleResponseSwagger {
@@ -26,7 +26,7 @@ export class JsonApiCollectionResponseSwagger {
 	data!: JsonApiResourceSwagger[];
 
 	@ApiProperty({ type: 'object', additionalProperties: true })
-	meta!: Record<string, any>;
+	meta!: Record<string, unknown>;
 
 	@ApiProperty({ type: JsonApiLinksSwagger })
 	links!: JsonApiLinksSwagger;

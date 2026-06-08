@@ -64,7 +64,10 @@ describe('ProductsRepository', () => {
 		});
 
 		it('should detect hasNext when more results exist', async () => {
-			const items = [{ ...mockProduct, id: 1 }, { ...mockProduct, id: 2 }];
+			const items = [
+				{ ...mockProduct, id: 1 },
+				{ ...mockProduct, id: 2 }
+			];
 			mockModel.findAll.mockResolvedValue(items);
 			const result = await repository.findAll({ size: 1 });
 			expect(result.hasNext).toBe(true);

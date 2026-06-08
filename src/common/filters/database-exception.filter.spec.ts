@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { UniqueConstraintError, ValidationError, ValidationErrorItem, ForeignKeyConstraintError, ConnectionError, BaseError } from 'sequelize'; // ValidationErrorItem used as type cast
 import { DatabaseExceptionFilter } from './database-exception.filter';
+import { LoggerService } from '../logger';
 
 class GenericDbError extends BaseError {
 	constructor(message: string) {
@@ -14,9 +15,18 @@ describe('DatabaseExceptionFilter', () => {
 	let mockResponse: { status: jest.Mock; json: jest.Mock };
 	let mockRequest: { method: string; url: string };
 	let mockHost: { switchToHttp: jest.Mock };
+	let mockLogger: jest.Mocked<LoggerService>;
 
 	beforeEach(() => {
-		filter = new DatabaseExceptionFilter();
+		mockLogger = {
+			log: jest.fn(),
+			debug: jest.fn(),
+			verbose: jest.fn(),
+			warn: jest.fn(),
+			error: jest.fn(),
+			fatal: jest.fn()
+		} as unknown as jest.Mocked<LoggerService>;
+		filter = new DatabaseExceptionFilter(mockLogger);
 		mockResponse = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 		mockRequest = { method: 'POST', url: '/v1/products' };
 		mockHost = {

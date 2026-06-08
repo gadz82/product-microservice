@@ -24,7 +24,9 @@ export class ProductsSerializer {
 	}
 
 	cursorLink(pageSize: number, nextCursor: number | null): string | null {
-		return nextCursor ? `/v1/products?pt=${PAGINATION_DEFAULTS.CURSOR_TYPE}&page[size]=${pageSize}&page[after]=${encodeCursor(nextCursor)}` : null;
+		return nextCursor
+			? `/v1/products?pt=${PAGINATION_DEFAULTS.CURSOR_TYPE}&page[size]=${pageSize}&page[after]=${encodeCursor(nextCursor)}`
+			: null;
 	}
 
 	offsetLink(page: number, limit: number, hasNext: boolean): string | null {

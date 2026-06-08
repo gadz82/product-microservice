@@ -14,7 +14,15 @@ describe('ProductsSerializer', () => {
 		stock: 100,
 		createdAt: new Date('2026-01-01'),
 		updatedAt: new Date('2026-01-01'),
-		toJSON: () => ({ id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100, createdAt: new Date('2026-01-01'), updatedAt: new Date('2026-01-01') })
+		toJSON: () => ({
+			id: 1,
+			productToken: 'tok-1',
+			name: 'Widget',
+			price: 9.99,
+			stock: 100,
+			createdAt: new Date('2026-01-01'),
+			updatedAt: new Date('2026-01-01')
+		})
 	} as unknown as Product;
 
 	beforeEach(async () => {
@@ -37,7 +45,7 @@ describe('ProductsSerializer', () => {
 			expect(result.data.attributes).not.toHaveProperty('productToken');
 		});
 
-  it('should serialize correctly even when timestamps are strings', () => {
+		it('should serialize correctly even when timestamps are strings', () => {
 			const dateStr = '2026-06-08T00:00:00.000Z';
 			const plainData = {
 				id: 2,

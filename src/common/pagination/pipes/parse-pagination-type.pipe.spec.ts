@@ -9,7 +9,7 @@ describe('ParsePaginationTypePipe', () => {
 	});
 
 	it('should return "offset" when value is "offset"', () => {
-			expect(pipe.transform('offset')).toBe('offset');
+		expect(pipe.transform('offset')).toBe('offset');
 	});
 
 	it('should return "cursor" when value is "cursor"', () => {

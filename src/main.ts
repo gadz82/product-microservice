@@ -4,6 +4,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter, DatabaseExceptionFilter } from './common/filters';
+import { LoggerService } from './common/logger';
 
 async function bootstrap(): Promise<void> {
 	const app = await NestFactory.create(AppModule);
@@ -12,7 +13,8 @@ async function bootstrap(): Promise<void> {
 		defaultVersion: '1'
 	});
 	app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
-	app.useGlobalFilters(new DatabaseExceptionFilter(), new HttpExceptionFilter());
+	const logger = new LoggerService();
+	app.useGlobalFilters(new DatabaseExceptionFilter(logger), new HttpExceptionFilter(logger));
 
 	const config = new DocumentBuilder()
 		.setTitle('Products Service')
