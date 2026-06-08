@@ -18,11 +18,12 @@ build: install
 test: unit-test integration-test
 
 unit-test: install
-	npm run run-unit-test
+	npm run unit-test
 
 integration-test: smoke-test
 	@sleep 3
-	npm run run-integration-test
+	npm run integration-test
+	npm run integration-test:errors
 
 migrate: install build up
 	npm run db:migrate
@@ -36,7 +37,7 @@ smoke-test: install build unit-test
 	@curl -sf http://localhost:3000/products?page=1&limit=1 > /dev/null && echo "Smoke test passed" || echo "Smoke test failed"
 
 full-test: down install build unit-test smoke-test
-	npm run run-integration-test && npm run run-integration-test:pagination
+	npm run integration-test:all
 
 logs:
 	docker compose logs -f
@@ -44,5 +45,6 @@ logs:
 clean: down
 	rm -rf dist coverage node_modules
 
-dev:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+dev: install
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d mysql
+	npm run start:dev

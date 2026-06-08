@@ -1,12 +1,7 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: builder
-    command: npx nest start --watch
-    volumes:
-      - .:/app
-      - /app/node_modules
-    environment:
-      NODE_ENV: development
+    profiles:
+      - disabled
+  mysql:
+    ports:
+      - "3306:3306"

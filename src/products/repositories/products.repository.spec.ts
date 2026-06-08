@@ -109,5 +109,36 @@ describe('ProductsRepository', () => {
 			await repository.remove(product as unknown as Product);
 			expect(product.destroy).toHaveBeenCalled();
 		});
+		it('should throw InternalServerErrorException when destroy fails', async () => {
+			const product = { ...mockProduct, id: 1, destroy: jest.fn().mockRejectedValue(new Error('DB error')) };
+			await expect(repository.remove(product as unknown as Product)).rejects.toThrow('Failed to remove product');
+		});
+	});
+
+	describe('error propagation', () => {
+		it('should rethrow error from create', async () => {
+			mockModel.create.mockRejectedValue(new Error('DB error'));
+			await expect(repository.create({ name: 'Widget', productToken: 'tok-1', price: 9.99, stock: 100 })).rejects.toThrow('DB error');
+		});
+		it('should rethrow error from findByToken', async () => {
+			mockModel.findOne.mockRejectedValue(new Error('DB error'));
+			await expect(repository.findByToken('tok-1')).rejects.toThrow('DB error');
+		});
+		it('should rethrow error from findById', async () => {
+			mockModel.findByPk.mockRejectedValue(new Error('DB error'));
+			await expect(repository.findById(1)).rejects.toThrow('DB error');
+		});
+		it('should rethrow error from findAll', async () => {
+			mockModel.findAll.mockRejectedValue(new Error('DB error'));
+			await expect(repository.findAll({ size: 10 })).rejects.toThrow('DB error');
+		});
+		it('should rethrow error from findAllOffset', async () => {
+			mockModel.findAndCountAll.mockRejectedValue(new Error('DB error'));
+			await expect(repository.findAllOffset({ page: 1, limit: 10 })).rejects.toThrow('DB error');
+		});
+		it('should rethrow error from updateStock', async () => {
+			const product = { ...mockProduct, save: jest.fn().mockRejectedValue(new Error('DB error')) };
+			await expect(repository.updateStock(product as unknown as Product, 50)).rejects.toThrow('DB error');
+		});
 	});
 });

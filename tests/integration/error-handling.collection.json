@@ -1,0 +1,379 @@
+{
+	"info": {
+		"name": "Products Error Handling",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup: Create product for error tests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 201', () => pm.response.to.have.status(201));",
+							"pm.collectionVariables.set('errTestToken', 'err-test-token');"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"Error Test Widget\", \"productToken\": \"err-test-token\", \"price\": 9.99, \"stock\": 10}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products"]
+				}
+			}
+		},
+		{
+			"name": "409 Conflict: Duplicate productToken",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 409', () => pm.response.to.have.status(409));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 409', () => pm.expect(json.statusCode).to.eql(409));",
+							"pm.test('Has error field', () => pm.expect(json.error).to.be.a('string'));",
+							"pm.test('Has message field', () => pm.expect(json.message).to.be.a('string'));",
+							"pm.test('Has path field', () => pm.expect(json.path).to.be.a('string'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"Duplicate Widget\", \"productToken\": \"err-test-token\", \"price\": 5.00, \"stock\": 5}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products"]
+				}
+			}
+		},
+		{
+			"name": "400 Bad Request: Missing required fields",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 400', () => pm.expect(json.statusCode).to.eql(400));",
+							"pm.test('Has error field', () => pm.expect(json.error).to.be.a('string'));",
+							"pm.test('Message is array of validation errors', () => pm.expect(json.message).to.be.an('array'));",
+							"pm.test('Has path field', () => pm.expect(json.path).to.be.a('string'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products"]
+				}
+			}
+		},
+		{
+			"name": "400 Bad Request: Invalid field types",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 400', () => pm.expect(json.statusCode).to.eql(400));",
+							"pm.test('Message is array of validation errors', () => pm.expect(json.message).to.be.an('array'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": 123, \"productToken\": \"tok-bad-types\", \"price\": \"not-a-number\", \"stock\": \"abc\"}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products"]
+				}
+			}
+		},
+		{
+			"name": "400 Bad Request: Negative price and stock",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 400', () => pm.expect(json.statusCode).to.eql(400));",
+							"pm.test('Message is array of validation errors', () => pm.expect(json.message).to.be.an('array'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"Bad Widget\", \"productToken\": \"tok-negative\", \"price\": -1.00, \"stock\": -5}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products"]
+				}
+			}
+		},
+		{
+			"name": "404 Not Found: Get non-existent product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 404', () => pm.response.to.have.status(404));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 404', () => pm.expect(json.statusCode).to.eql(404));",
+							"pm.test('Has error field', () => pm.expect(json.error).to.be.a('string'));",
+							"pm.test('Has message field', () => pm.expect(json.message).to.be.a('string'));",
+							"pm.test('Has path field', () => pm.expect(json.path).to.be.a('string'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/non-existent-token",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "non-existent-token"]
+				}
+			}
+		},
+		{
+			"name": "404 Not Found: Update stock of non-existent product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 404', () => pm.response.to.have.status(404));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 404', () => pm.expect(json.statusCode).to.eql(404));",
+							"pm.test('Has error field', () => pm.expect(json.error).to.be.a('string'));",
+							"pm.test('Has message field', () => pm.expect(json.message).to.be.a('string'));",
+							"pm.test('Has path field', () => pm.expect(json.path).to.be.a('string'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"stock\": 20}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/non-existent-token/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "non-existent-token", "stock"]
+				}
+			}
+		},
+		{
+			"name": "404 Not Found: Delete non-existent product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 404', () => pm.response.to.have.status(404));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 404', () => pm.expect(json.statusCode).to.eql(404));",
+							"pm.test('Has error field', () => pm.expect(json.error).to.be.a('string'));",
+							"pm.test('Has message field', () => pm.expect(json.message).to.be.a('string'));",
+							"pm.test('Has path field', () => pm.expect(json.path).to.be.a('string'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/non-existent-token",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "non-existent-token"]
+				}
+			}
+		},
+		{
+			"name": "400 Bad Request: Update stock with invalid body",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 400', () => pm.expect(json.statusCode).to.eql(400));",
+							"pm.test('Message is array of validation errors', () => pm.expect(json.message).to.be.an('array'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"stock\": \"not-a-number\"}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{errTestToken}}/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{errTestToken}}", "stock"]
+				}
+			}
+		},
+		{
+			"name": "400 Bad Request: Update stock with negative value",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 400', () => pm.expect(json.statusCode).to.eql(400));",
+							"pm.test('Message is array of validation errors', () => pm.expect(json.message).to.be.an('array'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"stock\": -10}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{errTestToken}}/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{errTestToken}}", "stock"]
+				}
+			}
+		},
+		{
+			"name": "400 Bad Request: Invalid pagination type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 400', () => pm.expect(json.statusCode).to.eql(400));",
+							"pm.test('Has error field', () => pm.expect(json.error).to.be.a('string'));",
+							"pm.test('Message mentions invalid pagination type', () => pm.expect(json.message).to.include('Invalid pagination type'));",
+							"pm.test('Has path field', () => pm.expect(json.path).to.be.a('string'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "{{baseUrl}}/v1/products?pt=invalid",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products"],
+					"query": [{ "key": "pt", "value": "invalid" }]
+				}
+			}
+		},
+		{
+			"name": "400 Bad Request: Invalid page param (non-integer)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 400', () => pm.expect(json.statusCode).to.eql(400));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "{{baseUrl}}/v1/products?page=abc",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products"],
+					"query": [{ "key": "page", "value": "abc" }]
+				}
+			}
+		},
+		{
+			"name": "Teardown: Delete product created for error tests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 204', () => pm.response.to.have.status(204));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{errTestToken}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{errTestToken}}"]
+				}
+			}
+		}
+	]
+}

@@ -18,17 +18,6 @@ services:
       retries: 5
       start_period: 30s
 
-  redis:
-    image: redis:7-alpine
-    container_name: products-redis
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
   app:
     build:
       context: .
@@ -44,12 +33,8 @@ services:
       DB_NAME: ${DB_NAME:-ecommerce}
       DB_USER: ${DB_USER:-appuser}
       DB_PASSWORD: ${DB_PASSWORD:-apppassword}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
     depends_on:
       mysql:
-        condition: service_healthy
-      redis:
         condition: service_healthy
 
 volumes:

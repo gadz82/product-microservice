@@ -102,5 +102,7 @@ Update this section as prompts are executed:
 | 8 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
 | 9 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
 | 10 | ✅ DONE | Junie | 2026-06-08 |
+| 11 | ✅ DONE | Junie | 2026-06-08 |
+| 12 | ✅ DONE | Junie | 2026-06-08 |
 
 Legend: ⬜ PENDING | 🔄 IN PROGRESS | ✅ DONE | ❌ FAILED
