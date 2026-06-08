@@ -102,9 +102,8 @@ Orchestrate local environment with:
 |-------------|----------------------------------|
 | Application | Node.js running NestJS           |
 | Database    | MySQL                            |
-| Cache       | Redis                            |
 
-**Orchestration**: `depends_on` with native healthchecks for MySQL and Redis. App waits until dependencies ready.
+**Orchestration**: `depends_on` with native healthchecks for MySQL. App waits until dependencies ready.
 
 ### Configuration & Environment Validation
 

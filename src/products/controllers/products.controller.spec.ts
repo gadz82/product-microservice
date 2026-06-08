@@ -58,8 +58,8 @@ describe('ProductsController', () => {
 			mockReadService.list.mockResolvedValue(listResult);
 			mockSerializer.offsetLink.mockReturnValue(null);
 			mockSerializer.many.mockReturnValue({ data: [], meta: {}, links: { next: null } });
-			await controller.findAll('ol', 1, 10, undefined, undefined);
-			expect(mockReadService.list).toHaveBeenCalledWith('ol', 1, 10, undefined, undefined);
+			await controller.findAll('offset', 1, 10, undefined, undefined);
+			expect(mockReadService.list).toHaveBeenCalledWith('offset', 1, 10, undefined, undefined);
 			expect(mockSerializer.many).toHaveBeenCalled();
 		});
 
@@ -70,6 +70,15 @@ describe('ProductsController', () => {
 			mockSerializer.many.mockReturnValue({ data: [], meta: {}, links: { next: '/v1/products?pt=cursor&page[size]=10&page[after]=MQ==' } });
 			await controller.findAll('cursor', undefined, undefined, 10, undefined);
 			expect(mockSerializer.cursorLink).toHaveBeenCalledWith(10, 1);
+		});
+
+		it('should use PAGINATION_DEFAULTS.SIZE when pt=cursor and size is undefined', async () => {
+			const listResult = { data: [mockProduct], meta: { hasNext: false }, nextCursor: null };
+			mockReadService.list.mockResolvedValue(listResult);
+			mockSerializer.cursorLink.mockReturnValue(null);
+			mockSerializer.many.mockReturnValue({ data: [], meta: {}, links: { next: null } });
+			await controller.findAll('cursor', undefined, undefined, undefined, undefined);
+			expect(mockSerializer.cursorLink).toHaveBeenCalledWith(10, null);
 		});
 	});
 

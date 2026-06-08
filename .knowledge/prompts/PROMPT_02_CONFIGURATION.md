@@ -40,8 +40,6 @@ export const envSchema = z.object({
 	DB_NAME: z.string().min(1),
 	DB_USER: z.string().min(1),
 	DB_PASSWORD: z.string().min(1),
-	REDIS_HOST: z.string().min(1),
-	REDIS_PORT: z.coerce.number().int().positive().default(6379)
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
@@ -69,10 +67,6 @@ export default () => ({
 		user: process.env.DB_USER,
 		password: process.env.DB_PASSWORD
 	},
-	redis: {
-		host: process.env.REDIS_HOST,
-		port: parseInt(process.env.REDIS_PORT ?? '6379', 10)
-	}
 });
 ```
 

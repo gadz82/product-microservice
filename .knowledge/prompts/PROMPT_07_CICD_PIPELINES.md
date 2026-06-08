@@ -114,11 +114,6 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=3s --health-retries=5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -135,8 +130,6 @@ jobs:
           DB_NAME: ecommerce
           DB_USER: appuser
           DB_PASSWORD: apppassword
-          REDIS_HOST: localhost
-          REDIS_PORT: 6379
         run: |
           npm run db:migrate
           npm run start &
@@ -194,8 +187,6 @@ variables:
   DB_NAME: ecommerce
   DB_USER: appuser
   DB_PASSWORD: apppassword
-  REDIS_HOST: redis
-  REDIS_PORT: "6379"
 
 install:
   stage: install
@@ -248,8 +239,6 @@ integration-test:
   services:
     - name: mysql:8.0
       alias: mysql
-    - name: redis:7-alpine
-      alias: redis
   script:
     - npm run db:migrate
     - npm run start &

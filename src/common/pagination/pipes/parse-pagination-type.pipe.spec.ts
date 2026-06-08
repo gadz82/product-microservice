@@ -4,12 +4,12 @@ import { ParsePaginationTypePipe } from './parse-pagination-type.pipe';
 describe('ParsePaginationTypePipe', () => {
 	const pipe = new ParsePaginationTypePipe();
 
-	it('should return "ol" when value is undefined', () => {
-		expect(pipe.transform(undefined)).toBe('ol');
+	it('should return "offset" when value is undefined', () => {
+		expect(pipe.transform(undefined)).toBe('offset');
 	});
 
-	it('should return "ol" when value is "ol"', () => {
-		expect(pipe.transform('ol')).toBe('ol');
+	it('should return "offset" when value is "offset"', () => {
+			expect(pipe.transform('offset')).toBe('offset');
 	});
 
 	it('should return "cursor" when value is "cursor"', () => {

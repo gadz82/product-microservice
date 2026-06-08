@@ -58,14 +58,4 @@ export class ProductsRepository {
 		await product.destroy();
 	}
 
-	buildFromCache(data: any): Product {
-		const product = this.productModel.build(data, { isNewRecord: false });
-		if (data.createdAt) {
-			product.setDataValue('createdAt', new Date(data.createdAt));
-		}
-		if (data.updatedAt) {
-			product.setDataValue('updatedAt', new Date(data.updatedAt));
-		}
-		return product;
-	}
 }

@@ -3,9 +3,8 @@
 ## Status Check
 
 Before executing, verify:
-- [ ] `docker-compose.yml` exists with services: app, mysql, redis
+- [ ] `docker-compose.yml` exists with services: app, mysql
 - [ ] MySQL service has healthcheck configured
-- [ ] Redis service has healthcheck configured
 - [ ] App service uses `depends_on` with `condition: service_healthy`
 - [ ] `.env.example` exists with all required env vars
 - [ ] `Dockerfile` exists for the application (multi-stage build)
@@ -16,7 +15,7 @@ If ALL checks pass → mark as DONE. Otherwise, implement missing parts.
 
 ## Task
 
-Create Docker Compose orchestration with MySQL, Redis, and NestJS app. All services must have healthchecks, and the app must wait for dependencies to be healthy.
+Create Docker Compose orchestration with MySQL and NestJS app. All services must have healthchecks, and the app must wait for dependencies to be healthy.
 
 ## Implementation Steps
 
@@ -63,17 +62,6 @@ services:
       retries: 5
       start_period: 30s
 
-  redis:
-    image: redis:7-alpine
-    container_name: products-redis
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
   app:
     build:
       context: .
@@ -89,12 +77,8 @@ services:
       DB_NAME: ${DB_NAME:-ecommerce}
       DB_USER: ${DB_USER:-appuser}
       DB_PASSWORD: ${DB_PASSWORD:-apppassword}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
     depends_on:
       mysql:
-        condition: service_healthy
-      redis:
         condition: service_healthy
 
 volumes:
@@ -132,8 +116,6 @@ DB_USER=appuser
 DB_PASSWORD=apppassword
 DB_ROOT_PASSWORD=rootpassword
 
-REDIS_HOST=redis
-REDIS_PORT=6379
 ```
 
 ### 5. Create .dockerignore
@@ -161,5 +143,5 @@ docker compose down
 
 ```bash
 git add -A
-git commit -m "feat(docker): add Docker Compose with MySQL, Redis, healthchecks"
+git commit -m "feat(docker): add Docker Compose with MySQL, healthchecks"
 ```

@@ -10,8 +10,7 @@
 - **Language**: TypeScript (strict mode)
 - **ORM**: Sequelize + sequelize-typescript
 - **Database**: MySQL 8.0
-- **Cache**: Redis 7
-- **Containerization**: Docker Compose (app, mysql, redis with healthchecks)
+- **Containerization**: Docker Compose (app, mysql with healthchecks)
 - **Testing**: Jest (unit), Newman (integration)
 - **CI/CD**: GitHub Actions + GitLab CI (dual-platform)
 - **Versioning**: Semantic Release + Conventional Commits

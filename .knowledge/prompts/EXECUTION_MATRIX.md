@@ -28,6 +28,7 @@ Prompts MUST be executed in sequential order. Each depends on the previous.
 | 7 | CI/CD Pipelines | `PROMPT_07_CICD_PIPELINES.md` | #5, #6 | `.github/workflows/ci.yml`, `.gitlab-ci.yml` |
 | 8 | Git Workflow | `PROMPT_08_GIT_WORKFLOW.md` | #0 | `.commitlintrc.json`, `.releaserc.json`, `.husky/commit-msg`, `.gitignore` |
 | 9 | Makefile & Scripts | `PROMPT_09_MAKEFILE_SCRIPTS.md` | #1, #6 | `Makefile`, finalized `package.json` scripts |
+| 10 | Best Practices Review | `PROMPT_10_BEST_PRACTICES_REVIEW.md` | all | Bug fixes, 100% branch coverage, `.knowledge/` updated |
 
 ## Dependency Graph
 
@@ -100,5 +101,6 @@ Update this section as prompts are executed:
 | 7 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
 | 8 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
 | 9 | ✅ DONE | Francesco Marchesini | 2026-06-07 |
+| 10 | ✅ DONE | Junie | 2026-06-08 |
 
 Legend: ⬜ PENDING | 🔄 IN PROGRESS | ✅ DONE | ❌ FAILED

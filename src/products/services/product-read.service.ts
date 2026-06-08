@@ -2,26 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { ProductsRepository } from '../repositories/products.repository';
 import { Product } from '../models/product.model';
 import { PaginationType, decodeCursor, PAGINATION_DEFAULTS } from '../../common/pagination';
-import { RedisLazyCacheService } from '../../common/cache';
 import { PaginatedProducts } from '../interfaces/paginated-products.interface';
-
 @Injectable()
 export class ProductReadService {
-	constructor(
-		private readonly productsRepository: ProductsRepository,
-		private readonly cacheService: RedisLazyCacheService
-	) {}
-
+	constructor(private readonly productsRepository: ProductsRepository) {}
 	async list(pt: PaginationType, page?: number, limit?: number, size?: number, after?: string): Promise<PaginatedProducts> {
-		const cacheKey = `product:list:${pt}:${page ?? ''}:${limit ?? ''}:${size ?? ''}:${after ?? ''}`;
-		const cached = await this.cacheService.get<PaginatedProducts>(cacheKey);
-		if (cached) {
-			return {
-				...cached,
-				data: cached.data.map((item: any) => this.productsRepository.buildFromCache(item))
-			};
-		}
-
 		let result: PaginatedProducts;
 		if (pt === PAGINATION_DEFAULTS.CURSOR_TYPE) {
 			const pageSize = size ?? PAGINATION_DEFAULTS.SIZE;
@@ -48,27 +33,13 @@ export class ProductReadService {
 				limit: repoResult.limit
 			};
 		}
-
-		await this.cacheService.set(cacheKey, {
-			...result,
-			data: result.data.map((p) => p.toJSON())
-		});
 		return result;
 	}
-
 	async findOneByToken(token: string): Promise<Product> {
-		const cacheKey = `product:detail:${token}`;
-		const cached = await this.cacheService.get<any>(cacheKey);
-		if (cached) {
-			return this.productsRepository.buildFromCache(cached);
-		}
-
 		const product = await this.productsRepository.findByToken(token);
 		if (!product) {
 			throw new NotFoundException(`Product with token "${token}" not found`);
 		}
-
-		await this.cacheService.set(cacheKey, product.toJSON());
 		return product;
 	}
 }

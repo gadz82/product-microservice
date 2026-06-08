@@ -17,9 +17,6 @@ export class Product extends Model {
 	@Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
 	declare stock: number;
 
-	@Column({ type: DataType.DATE, allowNull: false })
 	declare createdAt: Date;
-
-	@Column({ type: DataType.DATE, allowNull: false })
 	declare updatedAt: Date;
 }

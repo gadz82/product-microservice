@@ -37,7 +37,7 @@ describe('ProductsSerializer', () => {
 			expect(result.data.attributes).not.toHaveProperty('productToken');
 		});
 
-		it('should serialize correctly even when timestamps are strings (from Redis)', () => {
+  it('should serialize correctly even when timestamps are strings', () => {
 			const dateStr = '2026-06-08T00:00:00.000Z';
 			const plainData = {
 				id: 2,
