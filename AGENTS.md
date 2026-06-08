@@ -22,12 +22,24 @@ Single module: **Products**
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/products` | POST | Create product (name, productToken, price, stock) |
-| `/products` | GET | List with pagination (?page, ?limit) |
-| `/products/:id` | GET | Get single product |
-| `/products/:id/stock` | PATCH | Update stock |
-| `/products/:id` | DELETE | Remove product |
+| `/products` | GET | List with pagination (?page, ?limit, ?pt, ?page[size], ?page[after]) |
+| `/products/:productToken` | GET | Get single product |
+| `/products/:productToken` | PATCH | Update product (stock) |
+| `/products/:productToken` | DELETE | Remove product |
 
 Table `products`: id (PK auto-increment), productToken (unique), name, price (decimal), stock (integer).
+
+## Response Format
+
+- JSON:API structure (`data.type`, `data.id` = productToken, `data.attributes`)
+- `productToken` is exposed in `data.attributes` for GET endpoints
+- `id` is excluded from `data.attributes` (only used as JSON:API resource id)
+
+## Error Handling
+
+- **Development**: Returns specific validation error messages (first error only via `stopAtFirstError`)
+- **Production**: Returns generic HTTP status label only (e.g., `BAD_REQUEST`), no details disclosed
+- Controlled by `NODE_ENV` environment variable
 
 ## Code Standards
 
@@ -66,3 +78,12 @@ database/                      ← Sequelize migrations & configuration
 
 ## Test execution and validation
 Always use package.json script, e.g. to run Unit Tests use npm run unit-test
+
+### Available scripts
+| Script | Purpose |
+|--------|---------|
+| `npm run unit-test` | Execute Jest unit test suite |
+| `npm run integration-test` | Execute Newman products CRUD collection |
+| `npm run integration-test:pagination` | Execute Newman pagination collection |
+| `npm run integration-test:errors` | Execute Newman error handling collection |
+| `npm run integration-test:all` | Execute all Newman collections |

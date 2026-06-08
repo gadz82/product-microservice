@@ -1,140 +1,223 @@
 {
-	"info": {
-		"name": "Products CRUD",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Create Product",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test('Status is 201', () => pm.response.to.have.status(201));",
-							"const json = pm.response.json();",
-							"pm.test('Has JSON:API data wrapper', () => pm.expect(json.data).to.be.an('object'));",
-							"pm.test('Type is products', () => pm.expect(json.data.type).to.eql('products'));",
-							"pm.test('Id is productToken', () => pm.expect(json.data.id).to.eql('int-test-token'));",
-							"pm.test('Attributes has name', () => pm.expect(json.data.attributes.name).to.eql('Integration Widget'));",
-							"pm.test('Attributes does NOT have id', () => pm.expect(json.data.attributes).to.not.have.property('id'));",
-							"pm.test('Attributes does NOT have productToken', () => pm.expect(json.data.attributes).to.not.have.property('productToken'));",
-							"pm.collectionVariables.set('productToken', json.data.id);"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [{ "key": "Content-Type", "value": "application/json" }],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"name\": \"Integration Widget\", \"productToken\": \"int-test-token\", \"price\": 19.99, \"stock\": 50}"
-				},
-    "url": { "raw": "{{baseUrl}}/v1/products", "host": ["{{baseUrl}}"], "path": ["v1", "products"] }
-			}
-		},
-		{
-			"name": "List Products",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
-							"const json = pm.response.json();",
-							"pm.test('Has data array', () => pm.expect(json.data).to.be.an('array'));",
-							"pm.test('Has meta with hasNext', () => pm.expect(json.meta).to.have.property('hasNext'));",
-							"pm.test('Has links with next', () => pm.expect(json.links).to.have.property('next'));",
-							"pm.test('Data items use productToken as id', () => { const item = json.data[0]; pm.expect(item.id).to.be.a('string'); pm.expect(item.attributes).to.not.have.property('id'); });"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-    "url": { "raw": "{{baseUrl}}/v1/products?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["v1", "products"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
-			}
-		},
-		{
-			"name": "Get Product",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
-							"const json = pm.response.json();",
-							"pm.test('Type is products', () => pm.expect(json.data.type).to.eql('products'));",
-							"pm.test('Id matches token', () => pm.expect(json.data.id).to.eql(pm.collectionVariables.get('productToken')));",
-							"pm.test('No id in attributes', () => pm.expect(json.data.attributes).to.not.have.property('id'));"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-    "url": { "raw": "{{baseUrl}}/v1/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["v1", "products", "{{productToken}}"] }
-			}
-		},
-		{
-			"name": "Update Stock",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
-							"const json = pm.response.json();",
-							"pm.test('JSON:API format', () => pm.expect(json.data.type).to.eql('products'));",
-							"pm.test('Stock updated in attributes', () => pm.expect(json.data.attributes.stock).to.eql(75));"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "PATCH",
-				"header": [{ "key": "Content-Type", "value": "application/json" }],
-				"body": { "mode": "raw", "raw": "{\"stock\": 75}" },
-    "url": { "raw": "{{baseUrl}}/v1/products/{{productToken}}/stock", "host": ["{{baseUrl}}"], "path": ["v1", "products", "{{productToken}}", "stock"] }
-			}
-		},
-		{
-			"name": "Delete Product",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test('Status is 204', () => pm.response.to.have.status(204));"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-    "url": { "raw": "{{baseUrl}}/v1/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["v1", "products", "{{productToken}}"] }
-			}
-		},
-		{
-			"name": "Get Deleted Product (404)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test('Status is 404', () => pm.response.to.have.status(404));"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-    "url": { "raw": "{{baseUrl}}/v1/products/{{productToken}}", "host": ["{{baseUrl}}"], "path": ["v1", "products", "{{productToken}}"] }
-			}
-		}
-	],
-	"variable": [
-		{ "key": "productToken", "value": "" }
-	]
+    "info": {
+        "name": "Products CRUD",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Create Product",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                            "const json = pm.response.json();",
+                            "pm.test('Has JSON:API data wrapper', () => pm.expect(json.data).to.be.an('object'));",
+                            "pm.test('Type is products', () => pm.expect(json.data.type).to.eql('products'));",
+                            "pm.test('Id is productToken', () => pm.expect(json.data.id).to.eql('int-test-token'));",
+                            "pm.test('Attributes has name', () => pm.expect(json.data.attributes.name).to.eql('Integration Widget'));",
+                            "pm.test('Attributes does NOT have id', () => pm.expect(json.data.attributes).to.not.have.property('id'));",
+                            "pm.collectionVariables.set('productToken', json.data.id);"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"name\": \"Integration Widget\", \"productToken\": \"int-test-token\", \"price\": 19.99, \"stock\": 50}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/v1/products",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "v1",
+                        "products"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "List Products",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                            "const json = pm.response.json();",
+                            "pm.test('Has data array', () => pm.expect(json.data).to.be.an('array'));",
+                            "pm.test('Has meta with hasNext', () => pm.expect(json.meta).to.have.property('hasNext'));",
+                            "pm.test('Has links with next', () => pm.expect(json.links).to.have.property('next'));",
+                            "pm.test('Data items use productToken as id', () => { const item = json.data[0]; pm.expect(item.id).to.be.a('string'); pm.expect(item.attributes).to.not.have.property('id'); });"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/v1/products?page=1&limit=10",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "v1",
+                        "products"
+                    ],
+                    "query": [
+                        {
+                            "key": "page",
+                            "value": "1"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "10"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get Product",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                            "const json = pm.response.json();",
+                            "pm.test('Type is products', () => pm.expect(json.data.type).to.eql('products'));",
+                            "pm.test('Id matches token', () => pm.expect(json.data.id).to.eql(pm.collectionVariables.get('productToken')));",
+                            "pm.test('No id in attributes', () => pm.expect(json.data.attributes).to.not.have.property('id'));"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/v1/products/{{productToken}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "v1",
+                        "products",
+                        "{{productToken}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Update Stock",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                            "const json = pm.response.json();",
+                            "pm.test('JSON:API format', () => pm.expect(json.data.type).to.eql('products'));",
+                            "pm.test('Stock updated in attributes', () => pm.expect(json.data.attributes.stock).to.eql(75));"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"stock\": 75}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/v1/products/{{productToken}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "v1",
+                        "products",
+                        "{{productToken}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Delete Product",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 204', () => pm.response.to.have.status(204));"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "DELETE",
+                "url": {
+                    "raw": "{{baseUrl}}/v1/products/{{productToken}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "v1",
+                        "products",
+                        "{{productToken}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get Deleted Product (404)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/v1/products/{{productToken}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "v1",
+                        "products",
+                        "{{productToken}}"
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "productToken",
+            "value": ""
+        }
+    ]
 }

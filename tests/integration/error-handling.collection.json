@@ -208,9 +208,9 @@
 					"raw": "{\"stock\": 20}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/v1/products/non-existent-token/stock",
+					"raw": "{{baseUrl}}/v1/products/non-existent-token",
 					"host": ["{{baseUrl}}"],
-					"path": ["v1", "products", "non-existent-token", "stock"]
+					"path": ["v1", "products", "non-existent-token"]
 				}
 			}
 		},
@@ -265,9 +265,9 @@
 					"raw": "{\"stock\": \"not-a-number\"}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/v1/products/{{errTestToken}}/stock",
+					"raw": "{{baseUrl}}/v1/products/{{errTestToken}}",
 					"host": ["{{baseUrl}}"],
-					"path": ["v1", "products", "{{errTestToken}}", "stock"]
+					"path": ["v1", "products", "{{errTestToken}}"]
 				}
 			}
 		},
@@ -295,9 +295,9 @@
 					"raw": "{\"stock\": -10}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/v1/products/{{errTestToken}}/stock",
+					"raw": "{{baseUrl}}/v1/products/{{errTestToken}}",
 					"host": ["{{baseUrl}}"],
-					"path": ["v1", "products", "{{errTestToken}}", "stock"]
+					"path": ["v1", "products", "{{errTestToken}}"]
 				}
 			}
 		},
