@@ -6,7 +6,7 @@ export class JsonApiLinksSwagger {
 	next!: string | null;
 }
 
-export function JsonApiSingleResponseSwaggerFor<T>(AttributesDto: Type<T>) {
+export function JsonApiSingleResponseSwaggerFor<T>(AttributesDto: Type<T>): Type<{ data: { type: string; id: string; attributes: T } }> {
 	const prefix = AttributesDto.name;
 
 	class JsonApiResourceSwagger {
@@ -30,7 +30,9 @@ export function JsonApiSingleResponseSwaggerFor<T>(AttributesDto: Type<T>) {
 	return JsonApiSingleResponseSwagger;
 }
 
-export function JsonApiCollectionResponseSwaggerFor<T>(AttributesDto: Type<T>) {
+export function JsonApiCollectionResponseSwaggerFor<T>(
+	AttributesDto: Type<T>
+): Type<{ data: { type: string; id: string; attributes: T }[]; meta: Record<string, unknown>; links: { next: string | null } }> {
 	const prefix = AttributesDto.name;
 
 	class JsonApiResourceSwagger {

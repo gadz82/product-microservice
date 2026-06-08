@@ -30,7 +30,6 @@ jobs:
         with:
           path: node_modules
           key: deps-${{ hashFiles('package-lock.json') }}
-      - run: npm install -g npm@latest
       - run: npm audit --audit-level=critical
 
   build:
@@ -73,7 +72,7 @@ jobs:
         with:
           path: node_modules
           key: deps-${{ hashFiles('package-lock.json') }}
-      - run: LOGGER_LEVEL=SILENT npm run run-unit-test
+      - run: LOGGER_LEVEL=SILENT npm run unit-test
 
   integration-test:
     runs-on: ubuntu-latest
