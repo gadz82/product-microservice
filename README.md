@@ -375,6 +375,78 @@ npm run export-swagger
 3. Open Postman → **Import** → **File** → select `openapi.json` from the project root
 4. Postman auto-generates a collection with all endpoints, request bodies, and response schemas
 
+## AI Agent Support
+
+This project includes structured metadata designed for AI coding agents. These files enable autonomous agents to understand the domain, follow conventions, and continue implementation work without human intervention.
+
+### AGENTS.md (Root)
+
+The root-level `AGENTS.md` is the **entry point** for any AI agent. It provides:
+
+- Architecture overview (NestJS, Sequelize, MySQL)
+- Domain summary (Products module, endpoints, schema)
+- Code standards (tabs, single quotes, BDD tests, conventional commits)
+- How to work on the project (read `.knowledge/` → execute prompts → commit)
+
+### .knowledge/ Folder
+
+The `.knowledge/` directory is the **single source of truth** for the entire project. It contains domain contracts, engineering blueprints, and idempotent execution prompts:
+
+| File | Role |
+|------|------|
+| `AGENTS.md` | Prompt strategy and execution protocol |
+| `assessment.md` | **Domain specification** — defines WHAT the system must do (functional requirements, schema, endpoints, acceptance criteria) |
+| `technical_requirements.md` | **Engineering blueprint** — defines HOW the system must be built (tech stack, standards, CI/CD, workflow rules) |
+| `prompts/EXECUTION_MATRIX.md` | Dependency graph and progress tracking (⬜ PENDING / ✅ DONE / ❌ FAILED) |
+| `prompts/PROMPT_00..12` | Idempotent implementation steps — each self-validating (check → implement → validate → commit) |
+
+**Execution flow:**
+
+```
+assessment.md + technical_requirements.md
+            │
+            ▼
+    EXECUTION_MATRIX.md  (ordered dependency graph)
+            │
+            ▼
+    PROMPT_00 → PROMPT_01 → ... → PROMPT_12
+```
+
+An agent can be dropped into the project at any point, read the matrix, and resume from where work stopped.
+
+### skills-lock.json
+
+This file is the **agent-skills equivalent of `package-lock.json`**. It records which skills are installed, their source, and a content hash for reproducibility:
+
+```json
+{
+  "version": 1,
+  "skills": {
+    "nestjs-best-practices": {
+      "source": "kadajett/agent-nestjs-skills",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "1b6f82e..."
+    }
+  }
+}
+```
+
+**Using [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI:**
+
+```bash
+# Install skills from skills-lock.json
+npx skills experimental_install
+
+# Install for specific agents only
+npx skills experimental_install -a claude-code -a opencode
+
+# Update skills from their source (re-fetches latest)
+npx skills update
+```
+
+**Why commit `skills-lock.json`?** Same reason you commit `package-lock.json` — it ensures all contributors and CI environments use the same skill versions. The `computedHash` lets the CLI detect drift.
+
 ## Troubleshooting
 
 ### MySQL connection refused
