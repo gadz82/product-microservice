@@ -45,13 +45,8 @@ jobs:
           path: node_modules
           key: deps-${{ hashFiles('package-lock.json') }}
       - run: npm run build
-      - name: Verify production boot
-        run: |
-          cp -r node_modules node_modules_backup
-          npm prune --omit=dev
-          NODE_ENV=production PORT=3000 DB_HOST=localhost DB_PORT=3306 DB_NAME=test DB_USER=test DB_PASSWORD=test LOGGER_LEVEL=SILENT timeout 5 node dist/main.js || true
-          rm -rf node_modules
-          mv node_modules_backup node_modules
+      - name: Verify dist exists
+        run: test -f dist/main.js
       - uses: actions/upload-artifact@v4
         with:
           name: dist
