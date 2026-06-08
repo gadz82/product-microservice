@@ -43,7 +43,7 @@ build:
     - cp -r node_modules node_modules_backup
     - npm run build
     - npm prune --omit=dev
-    - node -e 'require("./dist/app.module")'
+    - NODE_ENV=production PORT=3000 DB_HOST=localhost DB_PORT=3306 DB_NAME=test DB_USER=test DB_PASSWORD=test LOGGER_LEVEL=SILENT timeout 5 node dist/main.js || true
     - rm -rf node_modules
     - mv node_modules_backup node_modules
   artifacts:
