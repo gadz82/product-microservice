@@ -368,6 +368,13 @@ Or manually:
 npm run export-swagger
 ```
 
+### Importing into Postman
+
+1. Start the application: `npm run start:dev`
+2. Export the schema: `npm run export-swagger`
+3. Open Postman → **Import** → **File** → select `openapi.json` from the project root
+4. Postman auto-generates a collection with all endpoints, request bodies, and response schemas
+
 ## Troubleshooting
 
 ### MySQL connection refused

@@ -13,7 +13,7 @@ export function JsonApiSingleResponseSwaggerFor<T>(AttributesDto: Type<T>): Type
 		@ApiProperty({ example: 'products' })
 		type!: string;
 
-		@ApiProperty({ example: 'iphone-15' })
+		@ApiProperty({ example: 'apple-iphone-15-token' })
 		id!: string;
 
 		@ApiProperty({ type: () => AttributesDto })
@@ -39,7 +39,7 @@ export function JsonApiCollectionResponseSwaggerFor<T>(
 		@ApiProperty({ example: 'products' })
 		type!: string;
 
-		@ApiProperty({ example: 'iphone-15' })
+		@ApiProperty({ example: 'apple-iphone-15-token' })
 		id!: string;
 
 		@ApiProperty({ type: () => AttributesDto })
