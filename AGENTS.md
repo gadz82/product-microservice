@@ -41,7 +41,7 @@ Table `products`: id (PK auto-increment), productToken (unique), name, price (de
 | Semicolons | Yes |
 | Comments | Minimal, few words at critical logic only |
 | Tests | BDD nested describe (Class → Method → behavior) |
-| Commits | Conventional Commits (`type(scope): description`) |
+| Commits | Semantic Release styled Commits (`type(scope): description`) |
 
 ## Knowledge Base
 

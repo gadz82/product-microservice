@@ -5,3 +5,8 @@ dist
 AGENTS.md
 .knowledge
 .idea
+openapi.json
+coverage
+skills-lock.json
+.agents
+.claude

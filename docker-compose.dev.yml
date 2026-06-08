@@ -2,6 +2,8 @@ services:
   app:
     profiles:
       - disabled
+    environment:
+      LOGGER_LEVEL: ${LOGGER_LEVEL:-DEBUG}
   mysql:
     ports:
       - "3306:3306"

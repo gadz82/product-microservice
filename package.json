@@ -7,21 +7,22 @@
 		"setup": "npm ci && npx husky",
 		"run-dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
 		"start:dev": "nest start --watch",
-		"db:migrate": "node -r ts-node/register ./node_modules/.bin/sequelize db:migrate --config database/config/config.ts --migrations-path database/migrations",
-		"db:migrate:undo": "node -r ts-node/register ./node_modules/.bin/sequelize db:migrate:undo --config database/config/config.ts --migrations-path database/migrations",
-		"db:migration:generate": "node -r ts-node/register ./node_modules/.bin/sequelize migration:generate --config database/config/config.ts --migrations-path database/migrations --name",
+		"db:migrate": "npx sequelize-cli db:migrate --config database/config/config.js --migrations-path database/migrations",
+		"db:migrate:undo": "npx sequelize-cli db:migrate:undo --config database/config/config.js --migrations-path database/migrations",
+		"db:migration:generate": "npx sequelize-cli migration:generate --config database/config/config.js --migrations-path database/migrations --name",
 		"unit-test": "jest --coverage",
-		"integration-test": "newman run tests/integration/products.collection.json -e tests/integration/environment.json --reporters cli",
-  		"integration-test:pagination": "newman run tests/integration/pagination.collection.json -e tests/integration/environment.json --reporters cli",
-  		"integration-test:errors": "newman run tests/integration/error-handling.collection.json -e tests/integration/environment.json --reporters cli",
+		"integration-test": "npx newman run tests/integration/products.collection.json -e tests/integration/environment.json --reporters cli",
+		"integration-test:pagination": "npx newman run tests/integration/pagination.collection.json -e tests/integration/environment.json --reporters cli",
+		"integration-test:errors": "npx newman run tests/integration/error-handling.collection.json -e tests/integration/environment.json --reporters cli",
 		"integration-test:all": "npm run integration-test && npm run integration-test:pagination && npm run integration-test:errors",
 		"lint": "eslint \"{src,test}/**/*.ts\" --max-warnings=0",
 		"format": "prettier --write \"src/**/*.ts\"",
 		"format:check": "prettier --check \"src/**/*.ts\"",
 		"build": "rm -rf dist tsconfig.tsbuildinfo && nest build",
 		"start": "nest start",
-		"test": "npm run run-unit-test",
-		"prepare": "husky"
+		"test": "npm run unit-test",
+		"prepare": "husky",
+		"export-swagger": "ts-node -r tsconfig-paths/register src/export-swagger.ts"
 	},
 	"keywords": [],
 	"author": "",
@@ -39,7 +40,6 @@
 		"@nestjs/swagger": "^11.4.4",
 		"class-transformer": "0.5.1",
 		"class-validator": "0.15.1",
-		"ioredis": "^5.11.1",
 		"mysql2": "3.22.5",
 		"reflect-metadata": "0.2.2",
 		"rxjs": "7.8.2",
@@ -57,7 +57,6 @@
 		"@semantic-release/changelog": "6.0.3",
 		"@semantic-release/git": "10.0.1",
 		"@types/express": "^5.0.6",
-		"@types/ioredis": "^4.28.10",
 		"@types/jest": "30.0.0",
 		"@types/node": "25.9.2",
 		"@typescript-eslint/eslint-plugin": "8.60.1",
@@ -67,7 +66,6 @@
 		"eslint-plugin-prettier": "5.5.6",
 		"husky": "9.1.7",
 		"jest": "^30.4.2",
-		"newman": "6.2.2",
 		"prettier": "3.8.3",
 		"semantic-release": "24.2.9",
 		"sequelize-cli": "6.6.5",
@@ -75,8 +73,5 @@
 		"ts-loader": "9.6.0",
 		"ts-node": "10.9.2",
 		"typescript": "6.0.3"
-	},
-	"overrides": {
-		"handlebars": "4.7.9"
 	}
 }

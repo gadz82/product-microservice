@@ -8,3 +8,4 @@ coverage/
 tsconfig.tsbuildinfo
 /.agents
 /.claude/
+openapi.json

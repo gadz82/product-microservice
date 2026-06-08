@@ -1,1 +1,1 @@
-npm run unit-test
+npm run format:check

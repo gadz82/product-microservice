@@ -1,4 +1,4 @@
-.PHONY: install up down build test unit-test integration-test migrate smoke-test full-test logs clean dev
+.PHONY: install up down build test unit-test integration-test migrate smoke-test full-test logs clean dev swagger
 
 install:
 	npm run setup
@@ -48,3 +48,6 @@ clean: down
 dev: install
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d mysql
 	npm run start:dev
+
+swagger: install build
+	npm run export-swagger
