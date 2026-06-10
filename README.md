@@ -133,9 +133,10 @@ For convenience, a `Makefile` provides shortcuts for common operations:
 |----------|--------------------------------------|--------------------------------------|
 | `POST`   | `/v1/products`                      | Create a new product                 |
 | `GET`    | `/v1/products`                      | List products (paginated)            |
-| `GET`    | `/v1/products/:productToken`         | Get a specific product               |
-| `PATCH`  | `/v1/products/:productToken`         | Update product (stock)               |
-| `DELETE` | `/v1/products/:productToken`         | Remove a product                     |
+| `GET`    | `/v1/products/:productToken`        | Get a specific product               |
+| `PATCH`  | `/v1/products/:productToken`        | Set stock to absolute value (optimistic locking) |
+| `PATCH`  | `/v1/products/:productToken/stock`  | Adjust stock by delta (atomic, concurrent-safe) |
+| `DELETE` | `/v1/products/:productToken`        | Remove a product                     |
 
 ### Request Body (Create)
 
@@ -206,13 +207,14 @@ Runs Jest with coverage output. Reports are generated in `coverage/`.
 ### Integration Tests
 
 ```bash
-# Full suite (CRUD + pagination + error handling)
+# Full suite (CRUD + pagination + error handling + stock)
 npm run integration-test:all
 
 # Individual collections
 npm run integration-test           # CRUD operations
 npm run integration-test:pagination # Pagination endpoints
 npm run integration-test:errors    # Error handling scenarios
+npm run integration-test:stock     # Stock adjustment + concurrency
 ```
 
 Integration tests use Newman to execute Postman-style collections against a running instance. Requires MySQL to be running and migrations applied.
@@ -330,7 +332,7 @@ The architecture follows SOLID principles to ensure maintainability and separati
 
 **Liskov Substitution** — All services implement `@Injectable()` and are consumed through their concrete types via NestJS DI. The `LoggerService` implements the NestJS `LoggerService` interface, making it swappable with any NestJS-compatible logger.
 
-**Interface Segregation** — DTOs are split by use case: `CreateProductDto` for creation, `UpdateStockDto` for partial updates. The `PaginatedProducts` interface carries only the fields each pagination mode needs. The `JsonApiSerializer` exposes focused methods (`serializeOne`, `serializeMany`) rather than a single generic method.
+**Interface Segregation** — DTOs are split by use case: `CreateProductDto` for creation, `UpdateStockDto` for absolute stock sets, `AdjustStockDto` for delta adjustments. The `PaginatedProducts` interface carries only the fields each pagination mode needs. The `JsonApiSerializer` exposes focused methods (`serializeOne`, `serializeMany`) rather than a single generic method.
 
 **Dependency Inversion** — High-level modules depend on abstractions, not implementations. The controller depends on `ProductReadService` and `ProductWriteService`, not the repository directly. `ProductWriteService` uses `ProductReadService.findOneByToken` for existence checks instead of direct DB queries. All dependencies are injected through NestJS DI, making testing straightforward with mocks.
 
@@ -349,6 +351,7 @@ Table: `products`
 | `name`         | VARCHAR(255)   | NOT NULL                 |
 | `price`        | DECIMAL(10,2)  | NOT NULL                 |
 | `stock`        | INTEGER        | NOT NULL                 |
+| `version`      | INTEGER        | NOT NULL, DEFAULT 0      |
 
 ## Error Handling
 
@@ -457,6 +460,7 @@ This project ships a custom local skill at `.skills/product-nest-onboarding/SKIL
 **What it covers:**
 
 - Architecture decisions and *why* they were made (CQS lite, repository pattern, serializer layer, Zod validation, `stopAtFirstError`)
+- Record locking & concurrency strategies (optimistic locking for absolute stock sets, atomic SQL delta for relative adjustments)
 - Every way to run the app (quickstart, manual, Docker, Makefile)
 - JSON:API response internals — how domain objects become wire format, where `productToken` lives and why
 - Dual pagination (offset vs cursor) with concrete examples

@@ -24,10 +24,11 @@ Single module: **Products**
 | `/products` | POST | Create product (name, productToken, price, stock) |
 | `/products` | GET | List with pagination (?page, ?limit, ?pt, ?page[size], ?page[after]) |
 | `/products/:productToken` | GET | Get single product |
-| `/products/:productToken` | PATCH | Update product (stock) |
+| `/products/:productToken` | PATCH | Update product stock (absolute set, optimistic locking) |
+| `/products/:productToken/stock` | PATCH | Adjust product stock by delta (atomic, concurrent-safe) |
 | `/products/:productToken` | DELETE | Remove product |
 
-Table `products`: id (PK auto-increment), productToken (unique), name, price (decimal), stock (integer).
+Table `products`: id (PK auto-increment), productToken (unique), name, price (decimal), stock (integer), version (integer, for optimistic locking).
 
 ## Response Format
 
@@ -86,4 +87,5 @@ Always use package.json script, e.g. to run Unit Tests use npm run unit-test
 | `npm run integration-test` | Execute Newman products CRUD collection |
 | `npm run integration-test:pagination` | Execute Newman pagination collection |
 | `npm run integration-test:errors` | Execute Newman error handling collection |
+| `npm run integration-test:stock` | Execute Newman stock adjust collection |
 | `npm run integration-test:all` | Execute all Newman collections |
