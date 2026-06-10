@@ -1,6 +1,7 @@
 import { validate } from 'class-validator';
 import { CreateProductDto } from './create-product.dto';
 import { UpdateStockDto } from './update-stock.dto';
+import { AdjustStockDto } from './adjust-stock.dto';
 
 describe('DTO Validation', () => {
 	describe('CreateProductDto', () => {
@@ -81,6 +82,41 @@ describe('DTO Validation', () => {
 			const errors = await validate(dto);
 			expect(errors.length).toBeGreaterThan(0);
 			expect(errors[0].property).toBe('stock');
+		});
+	});
+
+	describe('AdjustStockDto', () => {
+		it('should pass with a positive delta', async () => {
+			const dto = new AdjustStockDto();
+			dto.delta = 5;
+
+			const errors = await validate(dto);
+			expect(errors.length).toBe(0);
+		});
+
+		it('should pass with a negative delta', async () => {
+			const dto = new AdjustStockDto();
+			dto.delta = -3;
+
+			const errors = await validate(dto);
+			expect(errors.length).toBe(0);
+		});
+
+		it('should fail if delta is not an integer', async () => {
+			const dto = new AdjustStockDto();
+			dto.delta = 1.5;
+
+			const errors = await validate(dto);
+			expect(errors.length).toBeGreaterThan(0);
+			expect(errors[0].property).toBe('delta');
+		});
+
+		it('should fail if delta is missing', async () => {
+			const dto = new AdjustStockDto();
+
+			const errors = await validate(dto);
+			expect(errors.length).toBeGreaterThan(0);
+			expect(errors[0].property).toBe('delta');
 		});
 	});
 });
