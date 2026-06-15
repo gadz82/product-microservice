@@ -24,7 +24,7 @@
 				"header": [{ "key": "Content-Type", "value": "application/json" }],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"name\": \"Stock Adjust Widget\", \"productToken\": \"adj-test-token\", \"price\": 9.99, \"stock\": 100}"
+					"raw": "{\"name\": \"Stock Adjust Widget\", \"productToken\": \"adj-test-token\", \"price\": \"9.99\", \"stock\": 100}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/v1/products",
