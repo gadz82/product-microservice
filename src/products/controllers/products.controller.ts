@@ -3,7 +3,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from 
 import { ProductReadService } from '../services/product-read.service';
 import { ProductWriteService } from '../services/product-write.service';
 import { ProductsSerializer } from '../serializers/products.serializer';
-import { CreateProductDto, UpdateStockDto, ProductResponseDto } from '../dto';
+import { CreateProductDto, UpdateStockDto, AdjustStockDto, ProductResponseDto } from '../dto';
 import { JsonApiSingleResponse, JsonApiCollectionResponse } from '../../common/serializer';
 import { JsonApiSingleResponseSwaggerFor, JsonApiCollectionResponseSwaggerFor } from '../../common/serializer/dto/json-api-response.dto';
 import { ParsePaginationTypePipe, PaginationType, PAGINATION_DEFAULTS } from '../../common/pagination';
@@ -68,13 +68,26 @@ export class ProductsController {
 	}
 
 	@Patch(':productToken')
-	@ApiOperation({ summary: 'Update product stock' })
+	@ApiOperation({ summary: 'Set product stock to an absolute value' })
 	@ApiParam({ name: 'productToken', description: 'Unique token identifying the product' })
 	@ApiBody({ type: UpdateStockDto })
 	@ApiResponse({ status: HttpStatus.OK, description: 'Stock updated successfully', type: ProductSingleResponseSwagger })
 	@ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Product not found' })
+	@ApiResponse({ status: HttpStatus.CONFLICT, description: 'Concurrent modification conflict — retry the request' })
 	async updateStock(@Param('productToken') productToken: string, @Body() dto: UpdateStockDto): Promise<JsonApiSingleResponse> {
 		const product = await this.productWriteService.updateStock(productToken, dto);
+		return this.serializer.one(product);
+	}
+
+	@Patch(':productToken/stock')
+	@ApiOperation({ summary: 'Adjust product stock by a delta (concurrent-safe)' })
+	@ApiParam({ name: 'productToken', description: 'Unique token identifying the product' })
+	@ApiBody({ type: AdjustStockDto })
+	@ApiResponse({ status: HttpStatus.OK, description: 'Stock adjusted successfully', type: ProductSingleResponseSwagger })
+	@ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Product not found' })
+	@ApiResponse({ status: HttpStatus.CONFLICT, description: 'Insufficient stock — delta would make stock negative' })
+	async adjustStock(@Param('productToken') productToken: string, @Body() dto: AdjustStockDto): Promise<JsonApiSingleResponse> {
+		const product = await this.productWriteService.adjustStock(productToken, dto.delta);
 		return this.serializer.one(product);
 	}
 

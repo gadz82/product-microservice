@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
+import { literal, LOCK, Op } from 'sequelize';
 import { Product } from '../models/product.model';
 import { CreateProductDto } from '../dto';
-import { CursorPaginationOptions, CursorPaginatedResult, OffsetPaginationOptions, OffsetPaginatedResult } from '../../common/pagination';
+import { CursorPaginatedResult, CursorPaginationOptions, OffsetPaginatedResult, OffsetPaginationOptions } from '../../common/pagination';
 
 @Injectable()
 export class ProductsRepository {
@@ -13,8 +13,8 @@ export class ProductsRepository {
 		return this.productModel.create({ ...dto });
 	}
 
-	async findByToken(token: string): Promise<Product | null> {
-		return this.productModel.findOne({ where: { productToken: token } });
+	async findByToken(token: string, lock: LOCK | undefined = undefined): Promise<Product | null> {
+		return this.productModel.findOne({ where: { productToken: token }, lock });
 	}
 
 	async findById(id: number): Promise<Product | null> {
@@ -52,6 +52,16 @@ export class ProductsRepository {
 	async updateStock(product: Product, stock: number): Promise<Product> {
 		product.stock = stock;
 		return product.save();
+	}
+
+	async adjustStock(token: string, delta: number): Promise<Product | null> {
+		const where: Record<string, unknown> = { productToken: token };
+		if (delta < 0) {
+			where.stock = { [Op.gte]: Math.abs(delta) };
+		}
+		const [affectedCount] = await this.productModel.update({ stock: literal(`stock + ${delta}`), version: literal('version + 1') }, { where });
+		if (affectedCount === 0) return null;
+		return this.findByToken(token);
 	}
 
 	async remove(product: Product): Promise<void> {

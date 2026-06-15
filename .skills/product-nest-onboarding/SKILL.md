@@ -8,7 +8,7 @@ description: >
 license: MIT
 metadata:
   author: gadz82
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # product-nest onboarding
@@ -81,7 +81,8 @@ src/
 │   │   └── products.controller.ts   # 5 endpoints, all Swagger-decorated
 │   ├── dto/
 │   │   ├── create-product.dto.ts    # name, productToken, price, stock — class-validator rules
-│   │   ├── update-stock.dto.ts      # stock only (PATCH)
+│   │   ├── update-stock.dto.ts      # stock only (PATCH absolute set)
+│   │   ├── adjust-stock.dto.ts      # delta (integer) — for atomic stock adjustment
 │   │   ├── product-response.dto.ts  # Swagger response shape
 │   │   └── index.ts                # Barrel export
 │   ├── interfaces/
@@ -106,7 +107,8 @@ tests/
 └── integration/
     ├── products.collection.json      # Newman: CRUD happy path + conflict/not-found
     ├── pagination.collection.json   # Newman: offset + cursor pagination scenarios
-    └── error-handling.collection.json # Newman: validation, 404, 409, method not allowed
+    ├── error-handling.collection.json # Newman: validation, 404, 409, method not allowed
+    └── stock-adjust.collection.json    # Newman: delta stock adjustment + concurrency scenarios
 
 .knowledge/                          # IMMUTABLE TRUTH — assessment.md + tech specs + execution prompts
 ```
@@ -120,7 +122,8 @@ tests/
 | POST | `/v1/products` | Create product | 201 |
 | GET | `/v1/products` | List (dual pagination) | 200 |
 | GET | `/v1/products/:productToken` | Get single | 200 / 404 |
-| PATCH | `/v1/products/:productToken` | Update stock | 200 / 404 |
+| PATCH | `/v1/products/:productToken`           | Set stock to absolute value (optimistic lock)     | 200 / 404 / 409 |
+| PATCH | `/v1/products/:productToken/stock`    | Adjust stock by delta (atomic, concurrent-safe)    | 200 / 404 / 409 |
 | DELETE | `/v1/products/:productToken` | Remove | 204 / 404 |
 
 ### Create — request body
@@ -202,7 +205,73 @@ This is deliberate and documented. Not a bug — a feature.
 Two global filters handle this:
 
 - **`HttpExceptionFilter`** (`src/common/filters/http-exception.filter.ts`) — Nest exceptions → JSON responses. Dev mode includes messages; prod mode strips them.
-- **`DatabaseExceptionFilter`** (`src/common/filters/database-exception.filter.ts`) — Sequelize errors → HTTP. `UniqueConstraintError` → 409, etc.
+- **`DatabaseExceptionFilter`** (`src/common/filters/database-exception.filter.ts`) — Sequelize errors → HTTP. `UniqueConstraintError` → 409, `OptimisticLockError` → 409, etc.
+
+---
+
+## Record Locking & Concurrency Strategies
+
+Two distinct stock update endpoints use **different** locking strategies — pick the right one for your use case.
+
+### The Problem
+
+Without locking, concurrent stock writes silently overwrite each other (lost-update race):
+
+```
+Thread A: read stock=100 → sets stock=50  → save
+Thread B: read stock=100 → sets stock=80  → save  ← A's write LOST
+```
+
+A naive `UPDATE SET stock=? WHERE id=?` has no version check.
+
+### Strategy 1 — Optimistic Locking: `PATCH /products/:productToken`
+
+For **absolute** stock sets ("set stock to 50"), the client must acknowledge current state before overwriting. Retry on conflict is the correct behavior.
+
+- **How**: Sequelize `version: true` on the model (`@Table` option). Every `.save()` adds `WHERE version = <current>` and auto-increments `version`. If 0 rows match → `OptimisticLockError` → 409 `"Product was modified concurrently. Please retry."`
+- **File**: `product.model.ts:3` — `@Table({ tableName: 'products', timestamps: true, version: true })`
+- **File**: `product-write.service.ts:36-38` — catches `OptimisticLockError` in `updateStock()`
+- **File**: `database-exception.filter.ts:29-31` — defense-in-depth mapping of any uncaught `OptimisticLockError` → 409
+- **Migration**: `20260610090000-add-products-version-column.ts` — adds `version` INTEGER column
+
+### Strategy 2 — Atomic Delta: `PATCH /products/:productToken/stock`
+
+For **relative** adjustments ("subtract 2 units"), concurrent deltas must compose, not conflict. Retry is wrong — the delta *is* the intent.
+
+- **How**: A single atomic SQL statement, no read-then-write:
+  ```sql
+  UPDATE products SET stock = stock + :delta, version = version + 1
+  WHERE productToken = :token AND stock + :delta >= 0
+  ```
+  - `WHERE stock + delta >= 0` prevents negative stock at DB level
+  - Returns 0 affected rows if product not found or stock underflow
+  - No `SELECT FOR UPDATE` needed — single statement is already atomic in InnoDB
+- **File**: `products.repository.ts:57-65` — `adjustStock(token, delta)` method
+- **File**: `product-write.service.ts:43-53` — `adjustStock()` validates existence, returns 409 on underflow
+- **DTO**: `adjust-stock.dto.ts` — `{ delta: -2 }`, validates integer with `@IsInt`
+
+### Lock Mode Support in `findByToken`
+
+The repository's `findByToken` accepts an optional Sequelize `LOCK` parameter (`products.repository.ts:16`):
+
+```ts
+async findByToken(token: string, lock: LOCK | undefined = undefined): Promise<Product | null> {
+  return this.productModel.findOne({ where: { productToken: token }, lock });
+}
+```
+
+Pass `LOCK.UPDATE` or `LOCK.SHARE` for `SELECT ... FOR UPDATE` / `SELECT ... LOCK IN SHARE MODE` when you need pessimistic row-level locking in a transaction. Not used by default — callers opt in explicitly.
+
+### Why Optimistic over Pessimistic (SELECT FOR UPDATE)?
+
+`SELECT FOR UPDATE` blocks concurrent **readers** on the same row for the entire transaction. Product reads (listings, detail pages) vastly outnumber writes. The 409-retry pattern only hurts when conflicts are frequent — rare for absolute stock sets. Optimistic locking keeps reads fast and undelayed.
+
+### Endpoint Locking Summary
+
+| Endpoint | Operation | Strategy | Conflict? |
+|----------|-----------|----------|-----------|
+| `PATCH /v1/products/:token` | Set stock to N | Optimistic lock (version column) | 409 — re-read + retry |
+| `PATCH /v1/products/:token/stock` | Adjust stock by N | Atomic SQL delta | 409 — only if stock would go negative |
 
 ---
 
@@ -321,6 +390,7 @@ npm run db:migration:generate -- --name add_columns  # Generate new migration
 | `name` | VARCHAR(255) | NOT NULL |
 | `price` | DECIMAL(10,2) | NOT NULL |
 | `stock` | INTEGER | NOT NULL |
+| `version` | INTEGER | NOT NULL, DEFAULT 0 |
 
 `id` never leaves the DB — never exposed in API responses. `productToken` is the external identifier and JSON:API `id`.
 

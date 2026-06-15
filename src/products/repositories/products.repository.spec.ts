@@ -13,7 +13,8 @@ describe('ProductsRepository', () => {
 		findOne: jest.fn(),
 		findByPk: jest.fn(),
 		findAll: jest.fn(),
-		findAndCountAll: jest.fn()
+		findAndCountAll: jest.fn(),
+		update: jest.fn()
 	};
 
 	beforeEach(async () => {
@@ -106,6 +107,42 @@ describe('ProductsRepository', () => {
 		});
 	});
 
+	describe('adjustStock', () => {
+		it('should atomically increment stock and return updated product', async () => {
+			mockModel.update.mockResolvedValue([1]);
+			mockModel.findOne.mockResolvedValue({ ...mockProduct, stock: 105 });
+			const result = await repository.adjustStock('tok-1', 5);
+			expect(result).not.toBeNull();
+			expect(result!.stock).toBe(105);
+			expect(mockModel.update).toHaveBeenCalled();
+		});
+
+		it('should atomically decrement stock with sufficient inventory', async () => {
+			mockModel.update.mockResolvedValue([1]);
+			mockModel.findOne.mockResolvedValue({ ...mockProduct, stock: 95 });
+			const result = await repository.adjustStock('tok-1', -5);
+			expect(result).not.toBeNull();
+			expect(result!.stock).toBe(95);
+			const updateCall = mockModel.update.mock.calls[0];
+			expect(updateCall[1].where).toHaveProperty('productToken', 'tok-1');
+			expect(updateCall[1].where).toHaveProperty('stock');
+		});
+
+		it('should return null when product not found or stock underflow', async () => {
+			mockModel.update.mockResolvedValue([0]);
+			const result = await repository.adjustStock('tok-1', -200);
+			expect(result).toBeNull();
+		});
+
+		it('should not add stock constraint when delta is positive', async () => {
+			mockModel.update.mockResolvedValue([1]);
+			mockModel.findOne.mockResolvedValue({ ...mockProduct, stock: 105 });
+			await repository.adjustStock('tok-1', 5);
+			const updateCall = mockModel.update.mock.calls[0];
+			expect(updateCall[1].where).not.toHaveProperty('stock');
+		});
+	});
+
 	describe('remove', () => {
 		it('should destroy the product', async () => {
 			const product = { ...mockProduct, destroy: jest.fn().mockResolvedValue(undefined) };
@@ -138,6 +175,10 @@ describe('ProductsRepository', () => {
 		it('should propagate error from updateStock', async () => {
 			const product = { ...mockProduct, save: jest.fn().mockRejectedValue(new Error('DB error')) };
 			await expect(repository.updateStock(product as unknown as Product, 50)).rejects.toThrow('DB error');
+		});
+		it('should propagate error from adjustStock', async () => {
+			mockModel.update.mockRejectedValue(new Error('DB error'));
+			await expect(repository.adjustStock('tok-1', 5)).rejects.toThrow('DB error');
 		});
 		it('should propagate error from remove', async () => {
 			const product = { ...mockProduct, destroy: jest.fn().mockRejectedValue(new Error('DB error')) };

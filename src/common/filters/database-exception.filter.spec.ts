@@ -1,5 +1,13 @@
 import { HttpStatus } from '@nestjs/common';
-import { UniqueConstraintError, ValidationError, ValidationErrorItem, ForeignKeyConstraintError, ConnectionError, BaseError } from 'sequelize'; // ValidationErrorItem used as type cast
+import {
+	UniqueConstraintError,
+	ValidationError,
+	ValidationErrorItem,
+	ForeignKeyConstraintError,
+	ConnectionError,
+	BaseError,
+	OptimisticLockError
+} from 'sequelize';
 import { DatabaseExceptionFilter } from './database-exception.filter';
 import { LoggerService } from '../logger';
 
@@ -46,6 +54,15 @@ describe('DatabaseExceptionFilter', () => {
 		expect(body.message).toBe('A record with the given unique field already exists');
 	});
 
+	it('should map OptimisticLockError to 409 CONFLICT', () => {
+		const exception = new OptimisticLockError({ message: 'Stale instance' });
+		filter.catch(exception, mockHost as never);
+		expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
+		const body = mockResponse.json.mock.calls[0][0];
+		expect(body.statusCode).toBe(409);
+		expect(body.message).toBe('Resource was modified by another request. Please retry.');
+	});
+
 	it('should map ValidationError to 422 UNPROCESSABLE_ENTITY', () => {
 		const item = { message: 'name is required' } as ValidationErrorItem;
 		const exception = new ValidationError('Validation error', [item]);
@@ -80,7 +97,6 @@ describe('DatabaseExceptionFilter', () => {
 	});
 
 	it('should fallback error label to "Error" for unmapped status', () => {
-		// Force mapException to return a status not in HttpStatus enum by spying
 		const exception = new GenericDbError('error');
 		jest.spyOn(filter as never, 'mapException').mockReturnValue({ status: 999, message: 'custom' } as never);
 		filter.catch(exception, mockHost as never);

@@ -1,0 +1,325 @@
+{
+	"info": {
+		"name": "Products Stock Adjust",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup: Create product for stock adjust tests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 201', () => pm.response.to.have.status(201));",
+							"const json = pm.response.json();",
+							"pm.test('Initial stock is 100', () => pm.expect(json.data.attributes.stock).to.eql(100));",
+							"pm.collectionVariables.set('adjTestToken', json.data.id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"Stock Adjust Widget\", \"productToken\": \"adj-test-token\", \"price\": 9.99, \"stock\": 100}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products"]
+				}
+			}
+		},
+		{
+			"name": "Adjust Stock: Increment by 10",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+							"const json = pm.response.json();",
+							"pm.test('JSON:API format', () => pm.expect(json.data.type).to.eql('products'));",
+							"pm.test('Stock incremented to 110', () => pm.expect(json.data.attributes.stock).to.eql(110));",
+							"pm.test('Id is productToken', () => pm.expect(json.data.id).to.eql(pm.collectionVariables.get('adjTestToken')));",
+							"pm.test('No id in attributes', () => pm.expect(json.data.attributes).to.not.have.property('id'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"delta\": 10}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{adjTestToken}}/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{adjTestToken}}", "stock"]
+				}
+			}
+		},
+		{
+			"name": "Adjust Stock: Decrement by 5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+							"const json = pm.response.json();",
+							"pm.test('Stock decremented to 105', () => pm.expect(json.data.attributes.stock).to.eql(105));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"delta\": -5}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{adjTestToken}}/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{adjTestToken}}", "stock"]
+				}
+			}
+		},
+		{
+			"name": "Adjust Stock: Decrement to zero",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+							"const json = pm.response.json();",
+							"pm.test('Stock is 0', () => pm.expect(json.data.attributes.stock).to.eql(0));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"delta\": -105}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{adjTestToken}}/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{adjTestToken}}", "stock"]
+				}
+			}
+		},
+		{
+			"name": "Adjust Stock: Insufficient stock returns 409",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 409', () => pm.response.to.have.status(409));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 409', () => pm.expect(json.statusCode).to.eql(409));",
+							"pm.test('Has error field', () => pm.expect(json.error).to.be.a('string'));",
+							"pm.test('Message mentions insufficient stock', () => pm.expect(json.message).to.include('Insufficient stock'));",
+							"pm.test('Has path field', () => pm.expect(json.path).to.be.a('string'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"delta\": -1}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{adjTestToken}}/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{adjTestToken}}", "stock"]
+				}
+			}
+		},
+		{
+			"name": "Verify stock unchanged after failed adjust",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+							"const json = pm.response.json();",
+							"pm.test('Stock still 0 after failed adjust', () => pm.expect(json.data.attributes.stock).to.eql(0));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{adjTestToken}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{adjTestToken}}"]
+				}
+			}
+		},
+		{
+			"name": "Adjust Stock: 404 for non-existent product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 404', () => pm.response.to.have.status(404));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 404', () => pm.expect(json.statusCode).to.eql(404));",
+							"pm.test('Has error field', () => pm.expect(json.error).to.be.a('string'));",
+							"pm.test('Has message field', () => pm.expect(json.message).to.be.a('string'));",
+							"pm.test('Has path field', () => pm.expect(json.path).to.be.a('string'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"delta\": 5}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/non-existent-token/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "non-existent-token", "stock"]
+				}
+			}
+		},
+		{
+			"name": "Adjust Stock: 400 for invalid delta (non-integer)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 400', () => pm.expect(json.statusCode).to.eql(400));",
+							"pm.test('Message is array of validation errors', () => pm.expect(json.message).to.be.an('array'));",
+							"pm.test('Has timestamp field', () => pm.expect(json.timestamp).to.be.a('string'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"delta\": 1.5}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{adjTestToken}}/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{adjTestToken}}", "stock"]
+				}
+			}
+		},
+		{
+			"name": "Adjust Stock: 400 for missing delta",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 400', () => pm.response.to.have.status(400));",
+							"const json = pm.response.json();",
+							"pm.test('Has statusCode 400', () => pm.expect(json.statusCode).to.eql(400));",
+							"pm.test('Message is array of validation errors', () => pm.expect(json.message).to.be.an('array'));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{adjTestToken}}/stock",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{adjTestToken}}", "stock"]
+				}
+			}
+		},
+		{
+			"name": "Set Stock (absolute): Verify existing endpoint still works",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 200', () => pm.response.to.have.status(200));",
+							"const json = pm.response.json();",
+							"pm.test('Stock set to 50', () => pm.expect(json.data.attributes.stock).to.eql(50));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"stock\": 50}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{adjTestToken}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{adjTestToken}}"]
+				}
+			}
+		},
+		{
+			"name": "Teardown: Delete product from stock adjust tests",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status is 204', () => pm.response.to.have.status(204));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"url": {
+					"raw": "{{baseUrl}}/v1/products/{{adjTestToken}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["v1", "products", "{{adjTestToken}}"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "adjTestToken",
+			"value": ""
+		}
+	]
+}

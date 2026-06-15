@@ -17,6 +17,7 @@ describe('ProductsController', () => {
 	const mockWriteService = {
 		create: jest.fn(),
 		updateStock: jest.fn(),
+		adjustStock: jest.fn(),
 		remove: jest.fn()
 	};
 
@@ -98,6 +99,17 @@ describe('ProductsController', () => {
 			mockSerializer.one.mockReturnValue({ data: { type: 'products', id: 'tok-1', attributes: { stock: 50 } } });
 			await controller.updateStock('tok-1', { stock: 50 });
 			expect(mockWriteService.updateStock).toHaveBeenCalledWith('tok-1', { stock: 50 });
+		});
+	});
+
+	describe('adjustStock', () => {
+		it('should delegate to writeService.adjustStock and serialize', async () => {
+			const adjustedProduct = { ...mockProduct, stock: 95 };
+			mockWriteService.adjustStock.mockResolvedValue(adjustedProduct);
+			mockSerializer.one.mockReturnValue({ data: { type: 'products', id: 'tok-1', attributes: { stock: 95 } } });
+			await controller.adjustStock('tok-1', { delta: -5 });
+			expect(mockWriteService.adjustStock).toHaveBeenCalledWith('tok-1', -5);
+			expect(mockSerializer.one).toHaveBeenCalledWith(adjustedProduct);
 		});
 	});
 

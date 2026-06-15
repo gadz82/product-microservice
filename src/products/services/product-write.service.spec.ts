@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import { OptimisticLockError } from 'sequelize';
 import { ProductWriteService } from './product-write.service';
 import { ProductsRepository } from '../repositories/products.repository';
 import { LoggerService } from '../../common/logger';
@@ -7,12 +8,13 @@ import { LoggerService } from '../../common/logger';
 describe('ProductWriteService', () => {
 	let service: ProductWriteService;
 
-	const mockProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: '9.99', stock: 100 };
+	const mockProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: '9.99', stock: 100, version: 1, save: jest.fn() };
 
 	const mockRepository = {
 		create: jest.fn(),
 		findByToken: jest.fn(),
 		updateStock: jest.fn(),
+		adjustStock: jest.fn(),
 		remove: jest.fn()
 	};
 
@@ -61,11 +63,11 @@ describe('ProductWriteService', () => {
 
 	describe('updateStock', () => {
 		it('should update stock when product exists', async () => {
-			mockRepository.findByToken.mockResolvedValue(mockProduct);
-			mockRepository.updateStock.mockResolvedValue({ ...mockProduct, stock: 50 });
+			const savedProduct = { ...mockProduct, stock: 50, save: jest.fn().mockResolvedValue({ ...mockProduct, stock: 50 }) };
+			mockRepository.findByToken.mockResolvedValue(savedProduct);
+			savedProduct.save.mockResolvedValue({ ...mockProduct, stock: 50 });
 			const result = await service.updateStock('tok-1', { stock: 50 });
 			expect(result.stock).toBe(50);
-			expect(mockRepository.updateStock).toHaveBeenCalledWith(mockProduct, 50);
 		});
 
 		it('should throw NotFoundException when product does not exist', async () => {
@@ -73,11 +75,55 @@ describe('ProductWriteService', () => {
 			await expect(service.updateStock('missing', { stock: 50 })).rejects.toThrow(NotFoundException);
 		});
 
-		it('should propagate repository error when updateStock fails', async () => {
+		it('should throw ConflictException on OptimisticLockError (concurrent modification)', async () => {
+			const productWithSave = { ...mockProduct, stock: 100, save: jest.fn() };
+			productWithSave.save.mockRejectedValue(new OptimisticLockError({ message: 'Stale model' }));
+			mockRepository.findByToken.mockResolvedValue(productWithSave);
+			await expect(service.updateStock('tok-1', { stock: 50 })).rejects.toThrow(ConflictException);
+			await expect(service.updateStock('tok-1', { stock: 50 })).rejects.toThrow(/modified concurrently/);
+		});
+
+		it('should propagate non-optimistic-lock errors from save', async () => {
+			const dbError = new Error('DB error');
+			const productWithSave = { ...mockProduct, save: jest.fn().mockRejectedValue(dbError) };
+			mockRepository.findByToken.mockResolvedValue(productWithSave);
+			await expect(service.updateStock('tok-1', { stock: 50 })).rejects.toThrow(dbError);
+		});
+	});
+
+	describe('adjustStock', () => {
+		it('should adjust stock positively when product exists', async () => {
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
+			mockRepository.adjustStock.mockResolvedValue({ ...mockProduct, stock: 105 });
+			const result = await service.adjustStock('tok-1', 5);
+			expect(result.stock).toBe(105);
+			expect(mockRepository.adjustStock).toHaveBeenCalledWith('tok-1', 5);
+		});
+
+		it('should adjust stock negatively when sufficient stock exists', async () => {
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
+			mockRepository.adjustStock.mockResolvedValue({ ...mockProduct, stock: 95 });
+			const result = await service.adjustStock('tok-1', -5);
+			expect(result.stock).toBe(95);
+		});
+
+		it('should throw NotFoundException when product does not exist', async () => {
+			mockRepository.findByToken.mockResolvedValue(null);
+			await expect(service.adjustStock('missing', 5)).rejects.toThrow(NotFoundException);
+		});
+
+		it('should throw ConflictException when stock would go negative (adjustStock returns null)', async () => {
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
+			mockRepository.adjustStock.mockResolvedValue(null);
+			await expect(service.adjustStock('tok-1', -200)).rejects.toThrow(ConflictException);
+			await expect(service.adjustStock('tok-1', -200)).rejects.toThrow(/Insufficient stock/);
+		});
+
+		it('should propagate repository error when adjustStock fails', async () => {
 			mockRepository.findByToken.mockResolvedValue(mockProduct);
 			const dbError = new Error('DB error');
-			mockRepository.updateStock.mockRejectedValue(dbError);
-			await expect(service.updateStock('tok-1', { stock: 50 })).rejects.toThrow(dbError);
+			mockRepository.adjustStock.mockRejectedValue(dbError);
+			await expect(service.adjustStock('tok-1', 5)).rejects.toThrow(dbError);
 		});
 	});
 

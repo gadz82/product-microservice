@@ -5,9 +5,9 @@ This directory contains the core domain logic for Product management.
 
 ## Structure
 - `controllers/`: `products.controller.ts` defines REST endpoints.
-- `dto/`: Request validation schemas.
+- `dto/`: Request validation schemas (`CreateProductDto`, `UpdateStockDto`, `AdjustStockDto`).
 - `interfaces/`: Shared interfaces (e.g., `PaginatedProducts`).
-- `models/`: `product.model.ts` Sequelize model.
+- `models/`: `product.model.ts` Sequelize model with optimistic locking (`version: true`).
 - `repositories/`: `products.repository.ts` data access layer (supports `buildFromCache`).
 - `serializers/`: `products.serializer.ts` for JSON:API compliance.
 - `services/`:

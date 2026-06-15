@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Inject } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { BaseError, UniqueConstraintError, ValidationError, ForeignKeyConstraintError, ConnectionError } from 'sequelize';
+import { BaseError, UniqueConstraintError, ValidationError, ForeignKeyConstraintError, ConnectionError, OptimisticLockError } from 'sequelize';
 import { LoggerService } from '../logger';
 
 @Catch(BaseError)
@@ -26,6 +26,9 @@ export class DatabaseExceptionFilter implements ExceptionFilter {
 	}
 
 	private mapException(exception: BaseError): { status: number; message: string } {
+		if (exception instanceof OptimisticLockError) {
+			return { status: HttpStatus.CONFLICT, message: 'Resource was modified by another request. Please retry.' };
+		}
 		if (exception instanceof UniqueConstraintError) {
 			return { status: HttpStatus.CONFLICT, message: 'A record with the given unique field already exists' };
 		}
