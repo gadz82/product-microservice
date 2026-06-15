@@ -63,11 +63,11 @@ describe('ProductWriteService', () => {
 
 	describe('updateStock', () => {
 		it('should update stock when product exists', async () => {
-			const savedProduct = { ...mockProduct, stock: 50, save: jest.fn().mockResolvedValue({ ...mockProduct, stock: 50 }) };
-			mockRepository.findByToken.mockResolvedValue(savedProduct);
-			savedProduct.save.mockResolvedValue({ ...mockProduct, stock: 50 });
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
+			mockRepository.updateStock.mockResolvedValue({ ...mockProduct, stock: 50 });
 			const result = await service.updateStock('tok-1', { stock: 50 });
 			expect(result.stock).toBe(50);
+			expect(mockRepository.updateStock).toHaveBeenCalledWith(mockProduct, 50);
 		});
 
 		it('should throw NotFoundException when product does not exist', async () => {
@@ -76,17 +76,16 @@ describe('ProductWriteService', () => {
 		});
 
 		it('should throw ConflictException on OptimisticLockError (concurrent modification)', async () => {
-			const productWithSave = { ...mockProduct, stock: 100, save: jest.fn() };
-			productWithSave.save.mockRejectedValue(new OptimisticLockError({ message: 'Stale model' }));
-			mockRepository.findByToken.mockResolvedValue(productWithSave);
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
+			mockRepository.updateStock.mockRejectedValue(new OptimisticLockError({ message: 'Stale model' }));
 			await expect(service.updateStock('tok-1', { stock: 50 })).rejects.toThrow(ConflictException);
 			await expect(service.updateStock('tok-1', { stock: 50 })).rejects.toThrow(/modified concurrently/);
 		});
 
-		it('should propagate non-optimistic-lock errors from save', async () => {
+		it('should propagate non-optimistic-lock errors from updateStock', async () => {
 			const dbError = new Error('DB error');
-			const productWithSave = { ...mockProduct, save: jest.fn().mockRejectedValue(dbError) };
-			mockRepository.findByToken.mockResolvedValue(productWithSave);
+			mockRepository.findByToken.mockResolvedValue(mockProduct);
+			mockRepository.updateStock.mockRejectedValue(dbError);
 			await expect(service.updateStock('tok-1', { stock: 50 })).rejects.toThrow(dbError);
 		});
 	});

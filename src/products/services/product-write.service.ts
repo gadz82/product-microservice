@@ -27,9 +27,8 @@ export class ProductWriteService {
 		if (!product) {
 			throw new NotFoundException(`Product with token "${token}" not found`);
 		}
-		product.stock = dto.stock;
 		try {
-			const updated = await product.save();
+			const updated = await this.productsRepository.updateStock(product, dto.stock);
 			this.logger.log(`Product stock updated: ${token} -> ${dto.stock}`, 'ProductWriteService');
 			return updated;
 		} catch (error) {
