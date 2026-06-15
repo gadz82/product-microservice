@@ -8,7 +8,7 @@ describe('DTO Validation', () => {
 			const dto = new CreateProductDto();
 			dto.name = 'Valid Name';
 			dto.productToken = 'valid-token';
-			dto.price = 100.0;
+			dto.price = '100.00';
 			dto.stock = 10;
 
 			const errors = await validate(dto);
@@ -19,7 +19,7 @@ describe('DTO Validation', () => {
 			const dto = new CreateProductDto();
 			dto.name = 'a'.repeat(256);
 			dto.productToken = 'token';
-			dto.price = 10;
+			dto.price = '10.00';
 			dto.stock = 5;
 
 			const errors = await validate(dto);
@@ -31,7 +31,7 @@ describe('DTO Validation', () => {
 			const dto = new CreateProductDto();
 			dto.name = 'Name';
 			dto.productToken = 't'.repeat(256);
-			dto.price = 10;
+			dto.price = '10.00';
 			dto.stock = 5;
 
 			const errors = await validate(dto);
@@ -39,11 +39,23 @@ describe('DTO Validation', () => {
 			expect(errors[0].property).toBe('productToken');
 		});
 
-		it('should fail if price is too high', async () => {
+		it('should fail if price has too many integer digits', async () => {
 			const dto = new CreateProductDto();
 			dto.name = 'Name';
 			dto.productToken = 'token';
-			dto.price = 100000000; // 10^8
+			dto.price = '100000000'; // 9 digits, exceeds 8
+			dto.stock = 5;
+
+			const errors = await validate(dto);
+			expect(errors.length).toBeGreaterThan(0);
+			expect(errors[0].property).toBe('price');
+		});
+
+		it('should fail if price is not a valid decimal string', async () => {
+			const dto = new CreateProductDto();
+			dto.name = 'Name';
+			dto.productToken = 'token';
+			dto.price = 'not-a-number';
 			dto.stock = 5;
 
 			const errors = await validate(dto);
@@ -55,7 +67,7 @@ describe('DTO Validation', () => {
 			const dto = new CreateProductDto();
 			dto.name = 'Name';
 			dto.productToken = 'token';
-			dto.price = 10;
+			dto.price = '10.00';
 			dto.stock = 2147483648; // Max int + 1
 
 			const errors = await validate(dto);

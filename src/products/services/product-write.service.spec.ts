@@ -7,7 +7,7 @@ import { LoggerService } from '../../common/logger';
 describe('ProductWriteService', () => {
 	let service: ProductWriteService;
 
-	const mockProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100 };
+	const mockProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: '9.99', stock: 100 };
 
 	const mockRepository = {
 		create: jest.fn(),
@@ -42,20 +42,20 @@ describe('ProductWriteService', () => {
 		it('should create a product when token is unique', async () => {
 			mockRepository.findByToken.mockResolvedValue(null);
 			mockRepository.create.mockResolvedValue(mockProduct);
-			const result = await service.create({ name: 'Widget', productToken: 'tok-1', price: 9.99, stock: 100 });
+			const result = await service.create({ name: 'Widget', productToken: 'tok-1', price: '9.99', stock: 100 });
 			expect(result).toEqual(mockProduct);
 		});
 
 		it('should throw ConflictException when token already exists', async () => {
 			mockRepository.findByToken.mockResolvedValue(mockProduct);
-			await expect(service.create({ name: 'Widget', productToken: 'tok-1', price: 9.99, stock: 100 })).rejects.toThrow(ConflictException);
+			await expect(service.create({ name: 'Widget', productToken: 'tok-1', price: '9.99', stock: 100 })).rejects.toThrow(ConflictException);
 		});
 
 		it('should propagate repository error when create fails', async () => {
 			mockRepository.findByToken.mockResolvedValue(null);
 			const dbError = new Error('DB error');
 			mockRepository.create.mockRejectedValue(dbError);
-			await expect(service.create({ name: 'Widget', productToken: 'tok-1', price: 9.99, stock: 100 })).rejects.toThrow(dbError);
+			await expect(service.create({ name: 'Widget', productToken: 'tok-1', price: '9.99', stock: 100 })).rejects.toThrow(dbError);
 		});
 	});
 

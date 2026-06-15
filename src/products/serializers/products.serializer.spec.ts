@@ -10,7 +10,7 @@ describe('ProductsSerializer', () => {
 		id: 1,
 		productToken: 'tok-1',
 		name: 'Widget',
-		price: 9.99,
+		price: '9.99',
 		stock: 100,
 		createdAt: new Date('2026-01-01'),
 		updatedAt: new Date('2026-01-01'),
@@ -18,7 +18,7 @@ describe('ProductsSerializer', () => {
 			id: 1,
 			productToken: 'tok-1',
 			name: 'Widget',
-			price: 9.99,
+			price: '9.99',
 			stock: 100,
 			createdAt: new Date('2026-01-01'),
 			updatedAt: new Date('2026-01-01')
@@ -51,7 +51,7 @@ describe('ProductsSerializer', () => {
 				id: 2,
 				productToken: 'tok-2',
 				name: 'Gadget',
-				price: 19.99,
+				price: '19.99',
 				stock: 50,
 				createdAt: dateStr,
 				updatedAt: dateStr

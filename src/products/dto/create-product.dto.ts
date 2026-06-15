@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Matches, Max, MaxLength, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductDto {
@@ -14,11 +14,10 @@ export class CreateProductDto {
 	@MaxLength(255)
 	productToken!: string;
 
-	@ApiProperty({ example: 999.99, description: 'Product price', maximum: 99999999.99 })
-	@IsNumber()
-	@IsPositive()
-	@Max(99999999.99)
-	price!: number;
+	@ApiProperty({ example: '999.99', description: 'Product price as a decimal string (e.g. "99.99"), max 8 integer + 2 decimal digits' })
+	@IsString()
+	@Matches(/^\d{1,8}(\.\d{1,2})?$/, { message: 'price must be a positive decimal string with up to 2 decimal places (max 99999999.99)' })
+	price!: string;
 
 	@ApiProperty({ example: 50, description: 'Available stock quantity', minimum: 0, maximum: 2147483647 })
 	@IsNumber()

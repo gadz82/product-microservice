@@ -33,7 +33,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\"name\": \"Integration Widget\", \"productToken\": \"int-test-token\", \"price\": 19.99, \"stock\": 50}"
+                    "raw": "{\"name\": \"Integration Widget\", \"productToken\": \"int-test-token\", \"price\": \"19.99\", \"stock\": 50}"
                 },
                 "url": {
                     "raw": "{{baseUrl}}/v1/products",

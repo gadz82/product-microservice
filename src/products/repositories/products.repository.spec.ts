@@ -6,7 +6,7 @@ import { Product } from '../models/product.model';
 describe('ProductsRepository', () => {
 	let repository: ProductsRepository;
 
-	const mockProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100, save: jest.fn(), destroy: jest.fn() };
+	const mockProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: '9.99', stock: 100, save: jest.fn(), destroy: jest.fn() };
 
 	const mockModel = {
 		create: jest.fn(),
@@ -28,7 +28,7 @@ describe('ProductsRepository', () => {
 	describe('create', () => {
 		it('should create and return a product', async () => {
 			mockModel.create.mockResolvedValue(mockProduct);
-			const result = await repository.create({ name: 'Widget', productToken: 'tok-1', price: 9.99, stock: 100 });
+			const result = await repository.create({ name: 'Widget', productToken: 'tok-1', price: '9.99', stock: 100 });
 			expect(result).toEqual(mockProduct);
 		});
 	});
@@ -117,7 +117,7 @@ describe('ProductsRepository', () => {
 	describe('error propagation', () => {
 		it('should propagate error from create', async () => {
 			mockModel.create.mockRejectedValue(new Error('DB error'));
-			await expect(repository.create({ name: 'Widget', productToken: 'tok-1', price: 9.99, stock: 100 })).rejects.toThrow('DB error');
+			await expect(repository.create({ name: 'Widget', productToken: 'tok-1', price: '9.99', stock: 100 })).rejects.toThrow('DB error');
 		});
 		it('should propagate error from findByToken', async () => {
 			mockModel.findOne.mockRejectedValue(new Error('DB error'));

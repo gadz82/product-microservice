@@ -13,9 +13,9 @@ export class ProductResponseDto {
 	@Expose()
 	name!: string;
 
-	@ApiProperty({ example: 999.99 })
+	@ApiProperty({ example: '999.99' })
 	@Expose()
-	price!: number;
+	price!: string;
 
 	@ApiProperty({ example: 50 })
 	@Expose()

@@ -12,7 +12,7 @@ export class Product extends Model {
 	declare name: string;
 
 	@Column({ type: DataType.DECIMAL(10, 2), allowNull: false })
-	declare price: number;
+	declare price: string;
 
 	@Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
 	declare stock: number;

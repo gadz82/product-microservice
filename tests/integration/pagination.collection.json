@@ -26,7 +26,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\"name\": \"Pagination A\", \"productToken\": \"pag-tok-a\", \"price\": 10, \"stock\": 5}"
+                    "raw": "{\"name\": \"Pagination A\", \"productToken\": \"pag-tok-a\", \"price\": \"10.00\", \"stock\": 5}"
                 },
                 "url": {
                     "raw": "{{baseUrl}}/v1/products",
@@ -62,7 +62,7 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\"name\": \"Pagination B\", \"productToken\": \"pag-tok-b\", \"price\": 20, \"stock\": 10}"
+                    "raw": "{\"name\": \"Pagination B\", \"productToken\": \"pag-tok-b\", \"price\": \"20.00\", \"stock\": 10}"
                 },
                 "url": {
                     "raw": "{{baseUrl}}/v1/products",

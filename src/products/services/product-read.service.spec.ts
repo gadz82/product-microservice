@@ -11,10 +11,10 @@ describe('ProductReadService', () => {
 		id: 1,
 		productToken: 'tok-1',
 		name: 'Widget',
-		price: 9.99,
+		price: '9.99',
 		stock: 100,
-		get: jest.fn().mockReturnValue({ id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100 }),
-		toJSON: jest.fn().mockReturnValue({ id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100 })
+		get: jest.fn().mockReturnValue({ id: 1, productToken: 'tok-1', name: 'Widget', price: '9.99', stock: 100 }),
+		toJSON: jest.fn().mockReturnValue({ id: 1, productToken: 'tok-1', name: 'Widget', price: '9.99', stock: 100 })
 	};
 
 	const mockRepository = {

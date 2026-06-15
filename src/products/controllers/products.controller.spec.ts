@@ -7,7 +7,7 @@ import { ProductsSerializer } from '../serializers/products.serializer';
 describe('ProductsController', () => {
 	let controller: ProductsController;
 
-	const mockProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: 9.99, stock: 100 };
+	const mockProduct = { id: 1, productToken: 'tok-1', name: 'Widget', price: '9.99', stock: 100 };
 
 	const mockReadService = {
 		list: jest.fn(),
@@ -45,7 +45,7 @@ describe('ProductsController', () => {
 		it('should delegate to writeService and serialize', async () => {
 			mockWriteService.create.mockResolvedValue(mockProduct);
 			mockSerializer.one.mockReturnValue({ data: { type: 'products', id: 'tok-1', attributes: {} } });
-			const result = await controller.create({ name: 'Widget', productToken: 'tok-1', price: 9.99, stock: 100 });
+			const result = await controller.create({ name: 'Widget', productToken: 'tok-1', price: '9.99', stock: 100 });
 			expect(mockWriteService.create).toHaveBeenCalled();
 			expect(mockSerializer.one).toHaveBeenCalledWith(mockProduct);
 			expect(result.data.id).toBe('tok-1');
